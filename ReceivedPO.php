@@ -82,6 +82,11 @@ if ($selectedPO) {
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                        <div class="action-buttons">
+                            <button type="submit" id="receivedButton" onclick="locaton.href='deletePO.php'" class="btn btn-secondary">
+                                Mark PO as Deleted
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

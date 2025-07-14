@@ -68,7 +68,7 @@ if ($stmt === false) {
                 <h2 class="section-title collapsible">Add New Part to Inventory:</h2>
                 <div class="collapsible-content" style="display:none;">
                     <div class="form-grid">
-                        <form id="addProductForm" action="addInventory.php" class="form-grid" method="POST"> <!-- redirects to addInventory.php on click of submit button -->
+                        <form id="addProductForm" action="addInventory.php" class="form-grid" method="POST">
                             <label for="productNumber">Product Number:</label><br>
                             <input type="text" id="productNumber" class="form-control" name="productNumber" placeholder='Ex. A32-31241' required>
                             <label for="quantity">Quantity:</label><br>
