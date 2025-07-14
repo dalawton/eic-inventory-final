@@ -82,11 +82,6 @@ if ($selectedPO) {
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <div class="action-buttons">
-                            <button type="submit" id="receivedButton" onclick="locaton.href='deletePO.php'" class="btn btn-secondary">
-                                Mark PO as Deleted
-                            </button>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -98,6 +93,11 @@ if ($selectedPO) {
                     <div class="table-header">
                         <h2>Items Ordered for PO <?= htmlspecialchars($selectedPO) ?></h2>
                     </div>
+                    <div class="action-buttons">
+                            <button type="submit" id="receivedButton" onclick="locaton.href='deletePO.php'" class="btn btn-secondary">
+                                Delete PO
+                            </button>
+                        </div>
                     <div class="desc-info">
                         <p> If the full quantity of parts are received, click checkbox for each fully quantity of part</p>
                         <p> If not all items are received, change 'Amount Received' to the amount in the shipment and submit. Once the rest of the parts arrive, resubmit for those items</p>
