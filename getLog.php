@@ -31,7 +31,7 @@ $stmt = sqlsrv_query($conn, $sql);
 <head>
     <meta charset="UTF-8">
     <title>Inventory & Repair Action Log</title>
-    <link rel="stylesheet" href="stylePurchaseOrder.css">
+    <link rel="stylesheet" href="styleTracking.css">
     <style>
         .log-table th, .log-table td {
             text-align: center;

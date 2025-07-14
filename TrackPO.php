@@ -36,11 +36,19 @@ if ($conn === false) {
 $search = '';
 $where = '';
 $params = [];
-if (isset($_GET['search']) && $_GET['search'] !== '') {
-    $search = $_GET['search'];
-    // Adjust columns as needed (example: search by PONum or VendorID)
+
+if (isset($_GET['searchPO']) && $_GET['searchPO'] !== '') {
+    $search = $_GET['searchPO'];
     $where = "WHERE PONum LIKE ?";
-    $params = ["%$search%", "%$search%"];
+    $params = ["%$search%"];
+} elseif (isset($_GET['searchVendor']) && $_GET['searchVendor'] !== '') {
+    $search = $_GET['searchVendor'];
+    $where = "WHERE VendorID LIKE ?";
+    $params = ["%$search%"];
+} elseif (isset($_GET['searchName']) && $_GET['searchName'] !== '') {
+    $search = $_GET['searchName'];
+    $where = "WHERE Purchaser LIKE ?";
+    $params = ["%$search%"];
 }
 // Searches through POs using the search critera
 $sql = "SELECT * FROM POs $where";
@@ -58,7 +66,7 @@ if ($stmt === false) {
     <meta charset="UTF-8">
     <title>All Purchase Orders</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="stylePurchaseOrder.css">
+    <link rel="stylesheet" href="styleTracking.css">
 </head>
 <body>
     <div class="main-container">
@@ -68,7 +76,9 @@ if ($stmt === false) {
         <!-- Search Form -->
         <div class="form-content">
             <form class="form-control" method="get" action="">
-                <input type="search" style="width: 80%;" class="form-control" name="search" placeholder="Search PO Number or Vendor..." value="<?= htmlspecialchars($search) ?>">
+                <input type="search" style="width: 29%;" class="form-control" name="searchPO" placeholder="Search PO Number..." value="<?= htmlspecialchars($_GET['searchPO'] ?? '') ?>">
+                <input type="search" style="width: 29%;" class="form-control" name="searchVendor" placeholder="Search VendorID..." value="<?= htmlspecialchars($_GET['searchVendor'] ?? '') ?>">
+                <input type="search" style="width: 29%;" class="form-control" name="searchName" placeholder="Search Purchaser..." value="<?= htmlspecialchars($_GET['searchName'] ?? '') ?>">
                 <button type="submit" class="btn btn-secondary">Search</button>
                 <?php if ($search): ?>
                     <a href="TrackPO.php">Clear</a>

@@ -42,7 +42,7 @@ $stmt = sqlsrv_query($conn, $sql);
         <meta charset="UTF-8">
         <title>Track Repairs</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="styleRepair.css">
+        <link rel="stylesheet" href="styleTracking.css">
         <style>
             /* Additional responsive table styles */
             .product-table-container {
