@@ -1,19 +1,10 @@
 <?php
 
-/////////////////////////////////////////////////
-/* 
-- This file contains the process of adding a new
-part to the dbo.Inventory table.
+/**
+ * This file adds to inventory database
+ */
 
-- Change this file if the columns of the tables in
-the database change.
-*/
-/////////////////////////////////////////////////
-
-
-// Creates connection to the host, references the .env file to add additional security to the server
-// If any of the login information for the server changes, update in .env file.
-require_once __DIR__ . '/vendor/autoload.php';      // This acts as a bridge from this file to the .env file to get the information stored in the .env file.
+require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
 // Load environment variables
@@ -21,7 +12,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Database connection parameters
-    // This stores all the server information in variables which are local to this specific file
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
@@ -44,17 +34,11 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 // Get POST data (from ManageInventory.php)
-    // Because this file is directly referenced after a button click in ManageInventory and requires information from that file
-    // we must get that information using the POST method 
-    // (which sends the data to a different page) for html forms instead of the GET method (which sends the data to the same page)
 $productNumber = $_POST['productNumber'];
 $quantity = $_POST['quantity'] ?? NULL;
 $description = $_POST['description'];
 
 // SQL INSERT statement
-    // dbo.Inventory is the name of the Table
-    // (PN, Amount, Details) are the column titles in the Table
-    // (?, ?, ?) is apart of the inventory statement which escentially tells the compiler to reference the values that are defined next
 $sql = "INSERT INTO dbo.Inventory (PN, Amount, Details) VALUES (?, ?, ?)";
 $params = [$productNumber, $quantity, $description];
 

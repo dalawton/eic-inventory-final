@@ -1,14 +1,8 @@
 <?php
 
-/////////////////////////////////////////////////
-/* 
-- This file contains the process of adding a new
-battery template to the dbo.Battery table.
-
-- Change this file if the columns of the tables in
-the database change.
-*/
-/////////////////////////////////////////////////
+/**
+ * File to add new batteries to table of known batteries
+ */
 
 require_once __DIR__ . '/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
@@ -21,7 +15,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Database connection parameters
-    // This stores all the server information in variables which are local to this specific file
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];

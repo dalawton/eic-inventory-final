@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * File to fetch the description of a part in inventorys
+ */
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 

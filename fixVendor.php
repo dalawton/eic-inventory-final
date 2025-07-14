@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * File to process the changes to vendor defaults
+ */
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 

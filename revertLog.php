@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * File to revert a change from the log
+ */
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 

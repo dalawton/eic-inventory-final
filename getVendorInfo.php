@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * File to get details of selected vendor
+ */
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 

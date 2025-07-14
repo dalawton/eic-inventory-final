@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * File to submit details about an issue
+ */
+
 use Dotenv\Dotenv;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -12,7 +16,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Database connection parameters
-    // This stores all the server information in variables which are local to this specific file
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];

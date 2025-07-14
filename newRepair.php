@@ -1,8 +1,10 @@
 <?php
 
-// Creates connection to the host, references the .env file to add additional security to the server
-// If any of the login information for the server changes, update in .env file.
-require_once __DIR__ . '/vendor/autoload.php';      // This acts as a bridge from this file to the .env file to get the information stored in the .env file.
+/**
+ * File to create a new repair request
+ */
+
+require_once __DIR__ . '/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
@@ -13,7 +15,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Database connection parameters
-    // This stores all the server information in variables which are local to this specific file
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];

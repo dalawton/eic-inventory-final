@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * File to see all Issues and their information
+ */
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
