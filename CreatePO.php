@@ -23,6 +23,30 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
+// Function to get next PO number
+function getNextPONumber($conn) {
+    $sql = "SELECT MAX(CAST(PONum AS INT)) as maxPO FROM dbo.POs WHERE ISNUMERIC(PONum) = 1";
+    $stmt = sqlsrv_query($conn, $sql);
+    
+    if ($stmt === false) {
+        die("Error getting max PO number: " . print_r(sqlsrv_errors(), true));
+    }
+    
+    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    $maxPO = $row['maxPO'];
+    
+    // If no POs exist or max is less than 60266, start at 60266
+    if ($maxPO === null || $maxPO < 60266) {
+        return '60266';
+    }
+    
+    // Otherwise, increment by 1
+    return strval($maxPO + 1);
+}
+
+// Get the next PO number
+$nextPONumber = getNextPONumber($conn);
+
 // Vendor search logic
 $search = $_GET['vendor_search'] ?? '';
 $params = [];
@@ -86,16 +110,19 @@ if ($contractStmt === false) {
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="purchaseOrderNumber">Purchase Order #:</label>
-                            <input type="text" id="purchaseOrderNumber" name="purchaseOrderNumber" class="form-control" required>
+                            <input type="text" id="purchaseOrderNumber" name="purchaseOrderNumber" 
+                                   class="form-control" value="<?= htmlspecialchars($nextPONumber) ?>" 
+                                   readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                            <small style="color: #666; font-size: 0.9em;">Auto-generated - cannot be modified</small>
                         </div>
                         
                         <div class="form-group">
-                            <label for="fdate"></i>Date:</label>
+                            <label for="fdate">Date:</label>
                             <input type="date" id="fdate" name="date" class="form-control" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="requestorName"></i>Requestor:</label>
+                            <label for="requestorName">Requestor:</label>
                             <input type="text" id="requestorName" name="requestorName" class="form-control" required>
                         </div>
                     </div>
@@ -254,7 +281,7 @@ if ($contractStmt === false) {
                             <th>Unit Price</th>
                             <th>Description</th>
                             <th>Total</th>
-                            <th>Actions</th> <!-- New column -->
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
