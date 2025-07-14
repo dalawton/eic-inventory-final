@@ -1,0 +1,204 @@
+<?php
+// Creates connection to the host, references the .env file to add additional security to the server
+// If any of the login information for the server changes, update in .env file.
+require_once __DIR__ . '/vendor/autoload.php';      // This acts as a bridge from this file to the .env file to get the information stored in the .env file.
+use Dotenv\Dotenv;
+
+// Load environment variables (from .env)
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+// Database connection parameters
+    // This stores all the server information in variables which are local to this specific file
+$serverName = $_ENV['DB_HOST'];
+$dbUser = $_ENV['DB_USER'];
+$databaseName = $_ENV['DB_DATABASE'];
+$dbPassword = $_ENV['DB_PASSWORD'];
+
+// This establishes the login information as combined
+$connectionOptions = [
+    "Database" => (string)$databaseName,
+    "Uid" => (string)$dbUser,
+    "PWD" => (string)$dbPassword,
+    "Encrypt" => false,
+    "TrustServerCertificate" => true,
+];
+
+// Connect to the sql server using the server name and the combined login data
+$conn = sqlsrv_connect($serverName, $connectionOptions);
+
+// throws an error if the connection cannot be established
+if ($conn === false) {
+    die("Connection failed: " . print_r(sqlsrv_errors(), true));
+}
+
+$sql = "SELECT * FROM dbo.Repairs";
+$stmt = sqlsrv_query($conn, $sql);
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Track Repairs</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="styleRepair.css">
+        <style>
+            /* Additional responsive table styles */
+            .product-table-container {
+                overflow-x: auto;
+                margin: 30px 0;
+            }
+            
+            .product-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: auto;
+                min-width: 100%;
+            }
+            
+            .product-table th,
+            .product-table td {
+                padding: 8px 6px;
+                font-size: 0.85rem;
+                word-break: break-word;
+                border: 1px solid #e1e5e9;
+                text-align: center;
+                vertical-align: top;
+            }
+            
+            .product-table th {
+                background: #f8f9fa;
+                font-weight: 600;
+                color: #2c3e50;
+                white-space: nowrap;
+                min-width: 20px;
+                max-width: 150px;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+            
+            /* Specific column widths */
+            .product-table th:nth-child(1),
+            .product-table td:nth-child(1) {
+                max-width: 40px;
+                width: 40px;
+            }
+            
+            .product-table th:nth-child(2),
+            .product-table td:nth-child(2) {
+                max-width: 50px;
+                width: 50px;
+            }
+            
+            .product-table td {
+                white-space: normal;
+                max-width: 150px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .product-table tr:hover td {
+                background: #f8f9ff;
+            }
+            
+            @media (max-width: 1200px) {
+                .product-table th,
+                .product-table td {
+                    font-size: 0.8rem;
+                    padding: 6px 4px;
+                    max-width: 120px;
+                }
+            }
+            
+            @media (max-width: 768px) {
+                .product-table th,
+                .product-table td {
+                    font-size: 0.75rem;
+                    padding: 4px 2px;
+                    max-width: 100px;
+                }
+                
+                .product-table th {
+                    min-width: 60px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main-container">
+            <div class="header">
+                <h1>Track Repairs</h1>
+            </div>
+            <div class="form-content">
+                <div class="product-table-container">
+                    <div class="table-header"></div>
+                    <table class="product-table">
+                        <thead>
+                            <?php
+                            // Fetch the first row to get column names
+                            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+                            if ($row) {
+                                echo "<tr>";
+                                foreach (array_keys($row) as $colName) {
+                                    // Replace Serial_Number with SN for the header
+                                    if ($colName === 'SerialNumber') {
+                                        echo "<th>SN</th>";
+                                    } else {
+                                        echo "<th>" . htmlspecialchars($colName) . "</th>";
+                                    }
+                                }
+                                echo "</tr>";
+                            ?>
+                        </thead>
+                        <tbody>
+                            <?php
+                                // Output the first row
+                                echo "<tr>";
+                                foreach ($row as $value) {
+                                    if ($value instanceof DateTime) {
+                                        echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                    } else {
+                                        echo "<td>" . htmlspecialchars((string)$value) . "</td>";
+                                    }
+                                }
+                                echo "</tr>";
+
+                                // Output the rest of the rows
+                                while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                                    echo "<tr>";
+                                    foreach ($row as $value) {
+                                        if ($value instanceof DateTime) {
+                                            echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                        } else {
+                                            echo "<td>" . htmlspecialchars((string)$value) . "</td>";
+                                        }
+                                    }
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='100%'>No repairs found.</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Navigation -->
+            <div class="navigation">
+                <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
+                    Return to Front Page
+                </button>
+                <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
+                    Report an Issue
+                </button>
+            </div>
+        </div>
+    </body>
+</html>
+
+<?php
+sqlsrv_free_stmt($stmt);
+sqlsrv_close($conn);
+?>

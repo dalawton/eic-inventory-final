@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Directory</title>
+        <link rel="stylesheet" href="styleFrontPage.css">
+    </head>
+    <body>
+        <div class="main-container">
+            <div class="header">
+                <h1>Directory</h1>
+                <p>Select a category to get started:</p>
+            </div>
+            <div class="form-content">
+                <!-- Category and related button links to inventory management -->
+                 <div class="form-section">
+                    <div class="navigationBtn">
+                        <button type="button" style="border-radius:8px; border: 2px solid #6e7c8a; font-size: 1.4rem;" class="btn" id="inventoryManagement">Inventory</button>
+                        <div class="form-control; hidden" id="inventory">
+                            <br>
+                            <button type="button" class="btn" onclick="document.location='ManageInventory.php'">Manage Inventory</button>
+                            <button type="button" class="btn" onclick="document.location='checkoutCompletedBuilds.php'">Record Built Parts</button>
+                        </div>
+                    </div>
+
+                    <!-- Category and related button links to purchase orders -->
+                    <div class="navigationBtn">
+                        <button type="button" style="border-radius:8px; border: 2px solid #6e7c8a; font-size: 1.4rem;" class="btn" id="purchaseOrders">Purchase Orders</button>
+                        <div class="form-control; hidden" id="purchaseOrdersSection">
+                            <br>
+                            <button type="button" class="btn" onclick="document.location='CreatePO.php'">Create Purchase Order</button>
+                            <button type="button" class="btn" onclick="document.location='ReceivedPO.php'">Received Purchase Order</button>
+                            <button type="button" class="btn" onclick="document.location='TrackPO.php'">Track Purchase Orders</button>
+                        </div>
+                    </div>
+
+                    <!-- Category and related button links to repairs -->
+                    <div class="navigationBtn">
+                        <button type="button" style="border-radius:8px; border: 2px solid #6e7c8a; font-size: 1.4rem;" class="btn" id="repairs">Repairs</button>
+                        <div class="form-control; hidden" id="repairOptions">
+                            <br>
+                            <button type="button" class="btn" onclick="document.location='ReceivedRepair.html'">Received Repair</button>
+                            <button type="button" class="btn" onclick="document.location='ShipRepair.php'">Ship Repair</button>
+                            <button type="button" class="btn" onclick="document.location='TrackRepairs.php'">Track Repairs</button>
+                        </div>
+                    </div>
+                    <div class="navigationBtn">
+                        <button type="button" style="border-radius:8px; border: 2px solid #6e7c8a; font-size: 1.4rem;" class="btn" id="troubleshooting">Troubleshooting</button>
+                        <div class="form-control; hidden" id="troubleshootingOptions">
+                            <br>
+                            <button type="button" class="btn" onclick="document.location='possibleBugs.html'">Troubleshooting FAQ</button>
+                            <button type="button" class="btn" onclick="document.location='getLog.php'">Inventory and Repair Actions Log</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Category and related button links to report an issue -->
+            <!-- Navigation -->
+            <div class="navigation">
+                <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
+                    Report an Issue
+                </button>
+                <button onclick="location.href='TrackIssues.php'" class="btn btn-secondary">
+                    Track Reported Issues
+                </button>
+            </div>
+        </div>
+    </body>
+
+    <!-- JavaScript for unhiding the sub-buttons on click of category buttons !-->
+    <script>
+        document.getElementById('inventoryManagement').addEventListener('click', function() {
+            const inventorySection = document.getElementById('inventory');
+            inventorySection.classList.toggle('hidden');
+        });
+
+        document.getElementById('purchaseOrders').addEventListener('click', function() {
+            const purchaseOrdersSection = document.getElementById('purchaseOrdersSection');
+            purchaseOrdersSection.classList.toggle('hidden');
+        });
+
+        document.getElementById('repairs').addEventListener('click', function() {
+            const repairsSection = document.getElementById('repairOptions');
+            repairsSection.classList.toggle('hidden');
+        });
+
+        document.getElementById('troubleshooting').addEventListener('click', function() {
+            const troubleshootingSection = document.getElementById('troubleshootingOptions');
+            troubleshootingSection.classList.toggle('hidden');
+        });
+    </script>
+</html>

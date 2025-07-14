@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styleIssueReport.css">
+    <title>Submit an Issue</title>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="header">
+        <h1>Issue Submission</h1>
+      </div>
+      <div class="form-content">
+        <form id="issueSubmission" class="form-section" method="POST" action="submitIssue.php">
+          <div class="form-group">
+            <label for="typeRequest">Type of Request:</label>
+            <select id="typeRequest" name="typeRequest" class="form-control" required>
+                <option value="">--Select--</option>
+                <option value="Issue Report" name="Issue Report">Issue Report</option>
+                <option value="Request for New Feature" name="Feature Request">Feature Request</option>
+            </select>
+          </div>
+          <br><br>
+          <div class="form-group">
+            <label>Name: <input type="text" name="name" class="form-control"></label><br>
+            <label>Date: <input type="date" name="date" class="form-control"></label><br>
+            <label>Email: <input type="email" name="email" class="form-control"></label><br>
+            <label>Description:
+              <textarea name="message" rows="3" cols="40" class="form-control" required></textarea>
+            </label><br><br>
+          </div>
+          <div class="action-buttons">
+            <button type="submit" class="btn">Submit</button>
+          </div>
+        </form>
+      </div>
+      <div class="navigation">
+        <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">Return to Front Page</button>
+        <button onclick="location.href='TrackIssues.php'" class="btn btn-secondary">Track Reported Issues</button>
+      </div>
+    </div>
+  </body>
+</html>

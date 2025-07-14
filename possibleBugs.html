@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Troubleshooting</title>
+        <link rel="stylesheet" href="styleFrontPage.css">
+    </head>
+    <body>
+        <div class="main-container">
+            <div class="header">
+                <h1>Troubleshooting</h1>
+                <p>Search for an issue or see code documentation</p>
+            </div>
+            <div class="form-content">
+                <div class="form-section toc">
+                    <h2 class="section-title">Table of Contents</h2>
+                    <p>Click to navigate to selected section</p><br>
+                    <ul>
+                        <li><a href="#inventoryFields">Inventory</a></li>
+                        <li><a href="#purchaseOrderFields">Purchase Orders</a></li>
+                        <li><a href="#repairFields">Repairs</a></li>
+                        <li><a href="#otherFields">Other</a></li>
+                    </ul>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title" id="inventoryFields">Troubleshooting for Inventory</h2>
+                    
+                    <h2 class="title-section collapsible"><strong>Incorrectly Deleted, Updated or Added a Part to Inventory</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p>No worries! Click below to find a log of all operations performed to the inventory and repair databases.<br>
+                        Locate your action and click revert to restore the inventory database.<br>
+                        NOTE: If other actions were performed using the incorrect data, this function may not work</p>
+                        <button type="button" onclick="document.location='getLog.php'" id="goToLog" class="btn btn-secondary">Go To Log</button>
+                    </div>
+
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title" id="purchaseOrderFields">Troubleshooting for Purchase Orders</h2>
+
+                    <h2 class="title-section collapsible"><strong>Delete Purchase Order</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p><strong><u>Steps to Delete Purchase Order:</u></strong><br>
+                            <br><b>First - Delete Parts from PO Items Database</b><br>
+                            1. Open a new .sql file on a computer with connection to the SQL Server <br>
+                            2. Add the following text: <br>
+                            <strong>DELETE FROM dbo.POItems WHERE PONum= '<i>PO Number</i>';</strong><br>
+                            3. Replace '<i>PO Number</i>' with the Purchase Order Number Submitted, making sure to wrap the number in single quotes <br>
+                            4. Run the file and confirm deletion of parts associated with the PO number. <br>
+                            <br><b>Next - Delete PO from Purchase Order Database</b><br>
+                            5. Update the .sql file on the same computer to say:<br>
+                            <strong>DELETE FROM dbo.POs WHERE PONum= '<i>PO Number</i>';</strong><br>
+                            6. Replace '<i>PO Number</i>' with the Purchase Order Number Submitted, making sure to wrap the number in single quotes <br>
+                            7. Run the file and confirm deletion of Purchase Order.<br>
+                        </p>
+                    </div>
+                    
+                    <h2 class="title-section collapsible"><strong>Add, Change or Delete Email Recipient</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p><strong><u>Steps to Change Email Recipient</u></strong><br>
+                            <br>1. Locate the file called "submitPO.php"<br>
+                            2. Inside the 'sendPurchaseOrderEmail' function, find the recipient section<br>
+                            3. To add a CC recipient add "$mail->addCC('<i>EMAIL</i>', '<i>NAME</i>');"<br>
+                            4. Replace EMAIL and NAME with the intended addresses and make sure to wrap both values in single quotes<br>
+                            5. Save the file and ensure proper functionality.
+                        </p>
+                    </div>
+
+                    <h2 class="title-section collapsible"><strong>Add, Change or Delete Questions from Purchase Order Form</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p><!-- UPDATE WITH INSTRUCTIONS --></p>
+                    </div>
+
+                </div>
+
+                <div class="form-section">    
+                    <h2 class="section-title" id="repairFields">Troubleshooting for Repairs</h2>
+
+                    <h2 class="title-section collapsible"><strong>Delete Repair</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p><strong><u>Steps to Delete a Repair:</u></strong><br>
+                            1. Open a new .sql file on a computer with connection to the SQL Server <br>
+                            2. Add the following text: <br>
+                            <strong>DELETE FROM dbo.Repairs WHERE SerialNumber='<i>Serial Number</i>';</strong><br>
+                            3. Replace '<i>Serial Number</i>' with the Repair Serial Number, making sure to wrap the number in single quotes.<br>
+                            4. Run the file and ensure proper deletion from Repair Database.
+                        </p>
+                    </div>
+
+                    <h2 class="title-section collapsible"><strong>Add, Change or Delete Questions from Repair Forms</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p><!-- UPDATE WITH INSTRUCTIONS --></p>
+                    </div>
+
+                    <h2 class="title-section collapsible"><strong>Incorrectly Deleted, Updated or Added a Repair</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p>No worries! Click below to find a log of all operations performed to the inventory and repair databases.<br>
+                        Locate your action and click revert to restore the repair database.<br>
+                        NOTE: If other actions were performed using the incorrect data, this function may not work</p>
+                        <button type="button" onclick="document.location='getLog.php'" id="goToLog" class="btn btn-secondary">Go To Log</button>
+                    </div>
+
+                </div>
+
+                <div class="form-section">    
+                    <h2 class="section-title" id="otherFields">Other Troubleshooting</h2>
+
+                    <h2 class="title-section collapsible"><strong>BASIC SQL COMMANDS</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p>ADD:</p>
+                        <p>INSERT:</p>
+                        <p>UPDATE:</p>
+                        <p>DELETE:</p>
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- Navigation -->
+            <div class="navigation">
+                <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
+                    Return to Front Page
+                </button>
+                <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
+                    Report an Issue
+                </button>
+            </div>
+        </div>
+    </body>
+</html>
+<script>
+    document.querySelectorAll('.title-section.collapsible').forEach(function(header) {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function() {
+            var content = this.nextElementSibling;
+            this.classList.toggle('active');
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+            } else {
+                content.style.display = 'none';
+            }
+        });
+    });
+</script>
