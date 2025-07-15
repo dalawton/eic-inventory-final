@@ -125,7 +125,9 @@ if ($stmt === false) {
         </div>
         <div class="form-content">
             <div class="form-section">
-                <h2 class="section-title">Inventory Table</h2>
+                <h2 class="section-title">Inventory Table
+                    <button type="button" style="float: right; margin-right: 55px;" class="btn form-control btn-secondary" onclick="location.href='searchByBattery.php'">Search by Battery</button>
+                </h2>
                 <form id="searchInventory" method="get" action="">
                     <input type="search" style="width: 80%;" class="form-control" id="query" name="productNumber" placeholder="Search for Part Number..." value="<?= htmlspecialchars($search) ?>">
                     <button type="submit" class="btn btn-secondary">Search</button>
