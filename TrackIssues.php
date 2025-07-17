@@ -60,7 +60,7 @@ if ($stmt === false) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styleTracking.css">
+    <link rel="stylesheet" href="styleIssueReport.css">
     <title>Track Issues</title>
 </head>
 <body>
@@ -79,7 +79,6 @@ if ($stmt === false) {
                         <th>IssueID</th>
                         <th>Type of Request</th>
                         <th>Date Submitted</th>
-                        <th>Requestor</th>
                         <th>Details</th>
                         <th>Status</th>
                     </tr>
@@ -88,7 +87,6 @@ if ($stmt === false) {
                             <td><?php echo htmlspecialchars($row['IssueID']) ?></td>
                             <td><?php echo htmlspecialchars($row['TypeRequest']) ?></td>
                             <td><?php echo htmlspecialchars(($row['Date'])->format('Y-m-d H:i:s')) ?></td>
-                            <td><?php echo htmlspecialchars($row['Requestor'] ?? '') ?></td> <!-- The "?? '' "  allows null values to be displayed correctly -->
                             <td><?php echo htmlspecialchars($row['Details']) ?></td>
                             <td><?php echo htmlspecialchars($row['Status']) ?></td>
                         </tr>

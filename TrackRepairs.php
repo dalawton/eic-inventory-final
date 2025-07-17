@@ -53,7 +53,7 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-$sql = "SELECT * FROM dbo.Repairs";
+$sql = "SELECT SerialNumber, Requester, DateReceived, Details, Status, DateShipped, ShippingLocation FROM dbo.Repairs";
 $stmt = sqlsrv_query($conn, $sql);
 
 ?>
@@ -63,7 +63,7 @@ $stmt = sqlsrv_query($conn, $sql);
         <meta charset="UTF-8">
         <title>Track Repairs</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="styleTracking.css">
+        <link rel="stylesheet" href="styleIssueReport.css">
         <style>
             /* Additional responsive table styles */
             .product-table-container {
@@ -103,16 +103,46 @@ $stmt = sqlsrv_query($conn, $sql);
             /* Specific column widths */
             .product-table th:nth-child(1),
             .product-table td:nth-child(1) {
-                max-width: 40px;
-                width: 40px;
+                max-width: 100px;
+                width: 100px;
             }
             
             .product-table th:nth-child(2),
             .product-table td:nth-child(2) {
-                max-width: 50px;
-                width: 50px;
+                max-width: 100px;
+                width: 100px;
+
             }
             
+            .product-table th:nth-child(3),
+            .product-table td:nth-child(3) {
+                max-width: 90px;
+                width: 90px;
+            }
+
+            .product-table th:nth-child(4),
+            .product-table td:nth-child(4) {
+                max-width: 200px;
+                width: 200px;
+            }
+
+            .product-table th:nth-child(5),
+            .product-table td:nth-child(5) {
+                max-width: 80px;
+                width: 80px;
+            }
+
+            .product-table th:nth-child(6),
+            .product-table td:nth-child(6) {
+                max-width: 90px;
+                width: 90px;
+
+            }.product-table th:nth-child(7),
+            .product-table td:nth-child(7) {
+                max-width: 100px;
+                width: 100px;
+            }
+
             .product-table td {
                 white-space: normal;
                 max-width: 150px;
@@ -163,9 +193,16 @@ $stmt = sqlsrv_query($conn, $sql);
                             if ($row) {
                                 echo "<tr>";
                                 foreach (array_keys($row) as $colName) {
-                                    // Replace Serial_Number with SN for the header
-                                    if ($colName === 'SerialNumber') {
+                                    if ($colName === 'Requester') {
+                                        echo "<th>Company</th>";
+                                    } elseif ($colName === 'SerialNumber') {
                                         echo "<th>SN</th>";
+                                    } elseif ($colName === 'DateShipped') {
+                                        echo "<th>Date Shipped</th>";
+                                    } elseif ($colName === 'DateReceived') {
+                                        echo "<th>Date Received</th>";
+                                    } elseif ($colName === 'ShippingLocation') {
+                                        echo "<th>Shipping Location</th>";
                                     } else {
                                         echo "<th>" . htmlspecialchars($colName) . "</th>";
                                     }

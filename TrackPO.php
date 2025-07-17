@@ -88,6 +88,45 @@ if ($stmt === false) {
     <title>All Purchase Orders</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="stylePurchaseOrder.css">
+    <style>
+        .product-table th:nth-child(1),
+        .product-table td:nth-child(1) {
+            max-width: 100px;
+            width: 100px;
+        }
+        
+        .product-table th:nth-child(2),
+        .product-table td:nth-child(2) {
+            max-width: 100px;
+            width: 100px;
+        }
+
+        .product-table th:nth-child(3),
+        .product-table td:nth-child(3) {
+            max-width: 100px;
+            width: 100px;
+        }
+
+        .product-table th:nth-child(4),
+        .product-table td:nth-child(4) {
+            max-width: 100px;
+            width: 100px;
+            text-align: center;
+        }
+
+        .product-table th:nth-child(5),
+        .product-table td:nth-child(5) {
+            max-width: 100px;
+            width: 100px;
+        }
+
+        .product-table th:nth-child(6),
+        .product-table td:nth-child(6) {
+            max-width: 100px;
+            width: 100px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="main-container">
@@ -123,7 +162,7 @@ if ($stmt === false) {
                             echo "<tr class='text'>";
                             foreach ($row as $colName => $value) {
                                 if ($value instanceof DateTime) {
-                                    echo "<td>" . htmlspecialchars($value->format('Y-m-d H:i:s')) . "</td>";
+                                    echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
                                 } elseif (strtolower($colName) === 'price') {
                                     echo "<td>$" . number_format((float)$value, 2) . "</td>";
                                 } else {
@@ -137,7 +176,7 @@ if ($stmt === false) {
                                 echo "<tr class='text'>";
                                 foreach ($row as $colName => $value) {
                                     if ($value instanceof DateTime) {
-                                        echo "<td>" . htmlspecialchars($value->format('Y-m-d H:i:s')) . "</td>";
+                                        echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
                                     } elseif (strtolower($colName) === 'price') {
                                         echo "<td>$" . number_format((float)$value, 2) . "</td>";
                                     } else {
