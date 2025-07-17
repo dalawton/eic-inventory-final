@@ -1,8 +1,27 @@
 <?php
 
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
 /**
- * File to see inventory and links to add, update or delete inventory parts
+ * File to display current inventory and link to files to change 
+ * current inventory.
+ * 
+ * PHP version 8
+ * 
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ * 
+ * @category  Get_Files
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
  */
+// phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
@@ -129,9 +148,9 @@ if ($stmt === false) {
                     <button type="button" style="float: right; margin-right: 55px;" class="btn form-control btn-secondary" onclick="location.href='searchByBattery.php'">Search by Battery</button>
                 </h2>
                 <form id="searchInventory" method="get" action="">
-                    <input type="search" style="width: 80%;" class="form-control" id="query" name="productNumber" placeholder="Search for Part Number..." value="<?= htmlspecialchars($search) ?>">
+                    <input type="search" style="width: 80%;" class="form-control" id="query" name="productNumber" placeholder="Search for Part Number..." value="<?php echo htmlspecialchars($search) ?>">
                     <button type="submit" class="btn btn-secondary">Search</button>
-                    <?php if ($search): ?>
+                    <?php if ($search) : ?>
                         <a href="ManageInventory.php">Clear</a>
                     <?php endif; ?>
                 </form>
@@ -147,9 +166,9 @@ if ($stmt === false) {
                         <!-- Defines the table of inventory and its column titles from the connection to server -->
                         <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)): ?>
                             <tr>
-                                <td><?= htmlspecialchars($row['PN']) ?></td>
-                                <td><?= htmlspecialchars($row['Amount']) ?></td>
-                                <td><?= htmlspecialchars($row['Details'] ?? '') ?></td> <!-- The "?? '' "  allows null values to be displayed correctly -->
+                                <td><?php echo htmlspecialchars($row['PN']) ?></td>
+                                <td><?php echo htmlspecialchars($row['Amount']) ?></td>
+                                <td><?php echo htmlspecialchars($row['Details'] ?? '') ?></td> <!-- The "?? '' "  allows null values to be displayed correctly -->
                             </tr>
                         <?php endwhile; ?>
                     </table>

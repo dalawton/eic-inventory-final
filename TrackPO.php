@@ -1,8 +1,26 @@
 <?php
 
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
 /**
- * File to display and track all POs and their information
+ * File to display all POs and their respective information and status
+ * 
+ * PHP version 8
+ * 
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ * 
+ * @category  Get_Files
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
  */
+// phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
@@ -68,7 +86,7 @@ if ($stmt === false) {
     <meta charset="UTF-8">
     <title>All Purchase Orders</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styleTracking.css">
+    <link rel="stylesheet" href="stylePurchaseOrder.css">
 </head>
 <body>
     <div class="main-container">
@@ -78,11 +96,11 @@ if ($stmt === false) {
         <!-- Search Form -->
         <div class="form-content">
             <form class="form-control" method="get" action="">
-                <input type="search" style="width: 29%;" class="form-control" name="searchPO" placeholder="Search PO Number..." value="<?= htmlspecialchars($_GET['searchPO'] ?? '') ?>">
-                <input type="search" style="width: 29%;" class="form-control" name="searchVendor" placeholder="Search VendorID..." value="<?= htmlspecialchars($_GET['searchVendor'] ?? '') ?>">
-                <input type="search" style="width: 29%;" class="form-control" name="searchName" placeholder="Search Purchaser..." value="<?= htmlspecialchars($_GET['searchName'] ?? '') ?>">
+                <input type="search" style="width: 29%;" class="form-control" name="searchPO" placeholder="Search PO Number..." value="<?php echo htmlspecialchars($_GET['searchPO'] ?? '') ?>">
+                <input type="search" style="width: 29%;" class="form-control" name="searchVendor" placeholder="Search VendorID..." value="<?php echo htmlspecialchars($_GET['searchVendor'] ?? '') ?>">
+                <input type="search" style="width: 29%;" class="form-control" name="searchName" placeholder="Search Purchaser..." value="<?php echo htmlspecialchars($_GET['searchName'] ?? '') ?>">
                 <button type="submit" class="btn btn-secondary">Search</button>
-                <?php if ($search): ?>
+                <?php if ($search) : ?>
                     <a href="TrackPO.php">Clear</a>
                 <?php endif; ?>
             </form>
@@ -107,8 +125,7 @@ if ($stmt === false) {
                                     echo "<td>" . htmlspecialchars($value->format('Y-m-d H:i:s')) . "</td>";
                                 } elseif (strtolower($colName) === 'price') {
                                     echo "<td>$" . number_format((float)$value, 2) . "</td>";
-                                }
-                                else {
+                                } else {
                                     echo "<td>" . htmlspecialchars((string)$value) . "</td>";
                                 }
                             }
@@ -122,8 +139,7 @@ if ($stmt === false) {
                                         echo "<td>" . htmlspecialchars($value->format('Y-m-d H:i:s')) . "</td>";
                                     } elseif (strtolower($colName) === 'price') {
                                         echo "<td>$" . number_format((float)$value, 2) . "</td>";
-                                    }
-                                    else {
+                                    } else {
                                         echo "<td>" . htmlspecialchars((string)$value) . "</td>";
                                     }
                                 }

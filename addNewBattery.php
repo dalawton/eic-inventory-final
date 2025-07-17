@@ -1,7 +1,24 @@
 <?php
 
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
 /**
- * File to add new batteries to table of known batteries
+ * Adds new battery type into battery type table in database
+ * 
+ * PHP version 8
+ * 
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ * 
+ * @category  Submit_File
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
  */
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -47,7 +64,8 @@ $params = [$newBatteryName, 0];
 $stmt = sqlsrv_query($conn, $sql, $params);
 
 if ($stmt === false) {
-    die(print_r(sqlsrv_errors(), true)); }
+    die(print_r(sqlsrv_errors(), true)); 
+}
 
 
 foreach ($partNumbers as $i => $pn) {
@@ -65,7 +83,7 @@ foreach ($partNumbers as $i => $pn) {
     }
     $desc = $descriptions[$i] ?? '';
     $amt = $amountsUsed[$i] ?? 0;
-    $sqlPNs = "INSERT INTO dbo.PartsForBatteries (BatteryId, PN, Amount) VALUES (?, ?, ?)";
+    $sqlPNs = "INSERT INTO dbo.PartsForBatteries (BatteryId, PN, Amount) VALUES (?, ?, ?)"; // phpcs:ignore
     $params = [$batteryId, $pn, $amt];
     $stmtIns = sqlsrv_query($conn, $sqlPNs, $params);
 
@@ -75,7 +93,8 @@ foreach ($partNumbers as $i => $pn) {
         echo "Record added successfully.<br>";
     }
 }
-    // frees up the $stmt variable and closes the connection to allow for additional statements and security for the server
+    // frees up the $stmt variable and closes the connection
+        // to allow for additional statements and security for the server
     sqlsrv_free_stmt($stmt);
     sqlsrv_close($conn);
 ?>
@@ -88,10 +107,12 @@ foreach ($partNumbers as $i => $pn) {
     <body>
         <div class="main-container">
             <div class="navigation">
-                    <button onclick="location.href='checkoutCompletedBuilds.php'" class="btn btn-secondary">
+                    <button onclick="location.href='checkoutCompletedBuilds.php'" 
+                        class="btn btn-secondary">
                         Go Back
                     </button>
-                    <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
+                    <button onclick="location.href='ReportIssue.html'" 
+                        class="btn btn-secondary">
                         Report an Issue
                     </button>
             </div>

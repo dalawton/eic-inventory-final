@@ -1,8 +1,26 @@
 <?php
 
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
 /**
- * File to create a new repair request
+ * File to send information received by the submission of new repair form
+ * 
+ * PHP version 8
+ * 
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ * 
+ * @category  Change_Files
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
  */
+// phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
@@ -37,7 +55,15 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-function sendRepairEmail($formData) {
+/**
+ * This is an function that sends an Email after submission of previous form
+ *
+ * @param string $formData responses from previous form
+ *
+ * @return string Return either success or failure
+ */
+function sendRepairEmail($formData)
+{
     // Create a new PHPMailer instance
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
@@ -92,7 +118,15 @@ function sendRepairEmail($formData) {
     }
 }
 
-function generateRepairEmailBody($formData) {
+/**
+ * This is an function that sends an Email after submission of previous form
+ *
+ * @param string $formData responses from previous form
+ *
+ * @return string Return body of the email
+ */
+function generateRepairEmailBody($formData)
+{
     $html = '
     <!DOCTYPE html>
     <html lang="en">
@@ -218,7 +252,16 @@ function generateRepairEmailBody($formData) {
     return $html;
 }
 
-function generatePlainTextVersion($formData) {
+/**
+ * This is an function that sends an Email after submission of previous form
+ * specifically in plain text version
+ *
+ * @param string $formData responses from previous form
+ *
+ * @return string Return body of email in plain text version
+ */
+function generatePlainTextVersion($formData)
+{
     $text = "Repair - Received Part\n";
     $text .= "================================\n\n";
     
@@ -258,7 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
 
-    // if the $stmt statement executes correctly, a confirmation sentance will be printed
+        // if the $stmt statement executes correctly, a confirmation sentance will be printed
     } else {
         echo "Record added successfully. \n";
     }
@@ -285,3 +328,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // frees up the $stmt variable and closes the connection to allow for additional statements and security for the server
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
+?>

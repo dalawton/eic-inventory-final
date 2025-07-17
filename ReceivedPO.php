@@ -1,8 +1,27 @@
 <?php
 
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
 /**
- * File to add descriptions to the new repair
+ * File to change the status of an ordered PO and collect information
+ * about received parts in the selected PO.
+ * 
+ * PHP version 8
+ * 
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ * 
+ * @category  Submit_Files
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
  */
+// phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
@@ -79,8 +98,8 @@ if ($selectedPO) {
                         <select name="PO" class="form-control" id="PO" onchange="this.form.submit()"> <!-- Dropdown for unreceived POs -->
                             <option value="">--Select--</option>
                             <?php foreach ($poOptions as $PONum): ?>
-                                <option value="<?= htmlspecialchars($PONum) ?>" <?= $selectedPO == $PONum ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($PONum) ?>
+                                <option value="<?php echo htmlspecialchars($PONum) ?>" <?php echo $selectedPO == $PONum ? 'selected' : '' ?>>
+                                    <?php echo htmlspecialchars($PONum) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -89,11 +108,11 @@ if ($selectedPO) {
             </div>
         </div>
 
-        <?php if ($selectedPO): ?>
+        <?php if ($selectedPO) : ?>
             <div class="form-section">
                 <div class="product-table-container">
                     <div class="table-header">
-                        <h2>Items Ordered for PO <?= htmlspecialchars($selectedPO) ?></h2>
+                        <h2>Items Ordered for PO <?php echo htmlspecialchars($selectedPO) ?></h2>
                     </div>
                     <div class="action-buttons">
                             <button type="submit" id="receivedButton" onclick="locaton.href='deletePO.php'" class="btn btn-secondary">
@@ -105,7 +124,7 @@ if ($selectedPO) {
                         <p> If not all items are received, change 'Amount Received' to the amount in the shipment and submit. Once the rest of the parts arrive, resubmit for those items</p>
                     </div>
                     <form method="post" action="markPOReceived.php">
-                        <input type="hidden" name="PO" value="<?= htmlspecialchars($selectedPO) ?>">
+                        <input type="hidden" name="PO" value="<?php echo htmlspecialchars($selectedPO) ?>">
                         <table class="product-table" border="1">
                             <tr>
                                 <th>Part Number</th>
@@ -116,13 +135,13 @@ if ($selectedPO) {
                             <!-- Loops through the POItems that are assigned the selected PO number and displays them -->
                             <?php foreach ($items as $item): ?>
                             <tr>
-                                <td><?= htmlspecialchars($item['PN'] ?? '') ?></td>
-                                <td><?= htmlspecialchars($item['Quantity'] ?? '') ?></td>
+                                <td><?php echo htmlspecialchars($item['PN'] ?? '') ?></td>
+                                <td><?php echo htmlspecialchars($item['Quantity'] ?? '') ?></td>
                                 <td>
                                     <!-- Assigns a checkbox next to each item in the order to mark that item as received -->
-                                    <input type="checkbox" name="received_items[]" value="<?= htmlspecialchars($item['ItemID']) ?>">
+                                    <input type="checkbox" name="received_items[]" value="<?php echo htmlspecialchars($item['ItemID']) ?>">
                                 </td>
-                                <td><input type="number" class="form-control" name="amountRecieved" value="<?= htmlspecialchars($item['Quantity'] ?? '') ?>"></td>
+                                <td><input type="number" class="form-control" name="amountRecieved" value="<?php echo htmlspecialchars($item['Quantity'] ?? '') ?>"></td>
                             </tr>
                             <?php endforeach; ?>
                         </table>
