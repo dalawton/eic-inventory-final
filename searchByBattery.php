@@ -3,7 +3,8 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
- * File to log the submitted parts as subtracted from inventory
+ * File to search through the parts by selected battery and display their
+ * inventory count and status
  *
  * PHP version 8
  *
@@ -13,7 +14,7 @@
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
  *
- * @category  Change_Files
+ * @category  Get_Files
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
  * @copyright 1999 - 2019 The PHP Group
@@ -52,40 +53,3 @@ $conn = sqlsrv_connect($serverName, $connectionOptions);
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
-$partNumbers = $_POST['partNumber'] ?? [];
-$descriptions = $_POST['description'] ?? [];
-$amountsUsed = $_POST['amountUsed'] ?? [];
-
-foreach ($partNumbers as $i => $pn) {
-    $desc = $descriptions[$i] ?? '';
-    $amt = $amountsUsed[$i] ?? 0;
-    // Process as needed, e.g., update inventory, log usage, etc.
-    $invCheck = sqlsrv_query($conn, "SELECT Amount from dbo.Inventory WHERE PN = ?", [$pn]);
-    if ($row = sqlsrv_fetch_array($invCheck, SQLSRV_FETCH_ASSOC)) {
-        $newQty = $row['Amount'] - $amt;
-        sqlsrv_query($conn, "UPDATE dbo.Inventory SET Amount = ? WHERE PN = ?", [$newQty, $pn]);
-    } else {
-        sqlsrv_query($conn, "INSERT INTO dbo.Inventory (PN, Amount) VALUES (?, ?)", [$pn, 0]);
-    }
-}
-?>
-
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="styleCheckout.css">
-    </head>
-    <body>
-        <div class="main-container">
-            <div class="navigation">
-                    <button onclick="location.href='checkoutCompletedBuilds.php'" class="btn btn-secondary">
-                        Go Back
-                    </button>
-                    <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
-                        Report an Issue
-                    </button>
-            </div>
-        </div>
-    </body>
-</html>

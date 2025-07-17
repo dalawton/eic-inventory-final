@@ -1,19 +1,27 @@
 <?php
 
-/////////////////////////////////////////////////
-/* 
-- This file contains the process of adding a new
-part to the dbo.Inventory table.
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
-- Change this file if the columns of the tables in
-the database change.
-*/
-/////////////////////////////////////////////////
+/**
+ * Returns information about selected repair
+ *
+ * PHP version 8
+ *
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category  Change_File
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
+ */
 
-
-// Creates connection to the host, references the .env file to add additional security to the server
-// If any of the login information for the server changes, update in .env file.
-require_once __DIR__ . '/vendor/autoload.php';      // This acts as a bridge from this file to the .env file to get the information stored in the .env file.
+require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
 // Load environment variables
@@ -21,7 +29,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Database connection parameters
-    // This stores all the server information in variables which are local to this specific file
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
@@ -44,21 +51,16 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 // Get POST data (from ManageInventory.php)
-    // Because this file is directly referenced after a button click in ManageInventory and requires information from that file
-    // we must get that information using the POST method 
-    // (which sends the data to a different page) for html forms instead of the GET method (which sends the data to the same page)
 $productNumber = $_POST['productNumber'];
-$quantity = $_POST['quantity'] ?? NULL;
+$quantity = $_POST['quantity'] ?? null;
 $description = $_POST['description'];
 
 // SQL INSERT statement
-    // dbo.Inventory is the name of the Table
-    // (PN, Amount, Details) are the column titles in the Table
-    // (?, ?, ?) is apart of the inventory statement which escentially tells the compiler to reference the values that are defined next
 $sql = "INSERT INTO dbo.Inventory (PN, Amount, Details) VALUES (?, ?, ?)";
 $params = [$productNumber, $quantity, $description];
 
-// Creates the sql statement, establishes the connection, declares the statement and adds the values wishing to be inserted
+// Creates the sql statement, establishes the connection,
+    // declares the statement and adds the values wishing to be inserted
 $stmt = sqlsrv_query($conn, $sql, $params);
 
 // throws an error if $stmt does not execute correctly and prints the error
@@ -67,12 +69,13 @@ if ($stmt === false) {
 } else {
     echo "Record added successfully.";
     // Log the action
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity) VALUES (?, ?, ?, ?)";
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity) VALUES (?, ?, ?, ?)"; // phpcs:ignore
     $logParams = ['add', $productNumber, $description, $quantity];
     sqlsrv_query($conn, $logSql, $logParams);
 }
 
-// frees up the $stmt variable and closes the connection to allow for additional statements and security for the server
+// frees up the $stmt variable and closes the connection
+    // to allow for additional statements and security for the server
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>
@@ -86,10 +89,12 @@ sqlsrv_close($conn);
     <body>
         <div class="main-container">
             <div class="navigation">
-                    <button onclick="location.href='ManageInventory.php'" class="btn btn-secondary">
+                    <button onclick="location.href='ManageInventory.php'" 
+                        class="btn btn-secondary"> 
                         Go Back
                     </button>
-                    <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
+                    <button onclick="location.href='ReportIssue.html'" 
+                        class="btn btn-secondary">
                         Report an Issue
                     </button>
             </div>

@@ -3,7 +3,8 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
- * File to process the deletion of a part from the inventory table
+ * File to process the deletion of a PO order,
+ * AKA changing the status to cancelled
  *
  * PHP version 8
  *
@@ -22,7 +23,6 @@
  */
 
 // phpcs:disable Generic.Files.LineLength.TooLong
-
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
@@ -30,7 +30,8 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters$serverName = $_ENV['DB_HOST'];
+// Database connection parameters
+$serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
@@ -53,21 +54,7 @@ if ($conn === false) {
 }
 
 // Get POST data
-$productNumber = $_POST['deleteProductNumber'];
-
-// Fetch details for logging
-$fetchSql = "SELECT Details, Amount FROM dbo.Inventory WHERE PN = ?";
-$fetchStmt = sqlsrv_query($conn, $fetchSql, [$productNumber]);
-$details = '';
-$amount = null;
-if ($row = sqlsrv_fetch_array($fetchStmt, SQLSRV_FETCH_ASSOC)) {
-    $details = $row['Details'] ?? '';
-    $amount = $row['Amount'] ?? null;
-}
-
-// SQL DELETE statement
-$sql = "DELETE FROM dbo.Inventory WHERE PN = ?";
-$params = [$productNumber];
+$productNumber = $_POST['PO'];
 
 // Execute the query
 $stmt = sqlsrv_query($conn, $sql, $params);
@@ -76,8 +63,8 @@ if ($stmt === false) {
 } else {
     echo "Record deleted successfully.";
     // Log the action
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity) VALUES (?, ?, ?, ?)";
-    $logParams = ['delete', $productNumber, $details, $amount];
+    $logSql = "INSERT INTO dbo.POs (Status) VALUE ? WHERE PONum = ?";
+    $logParams = ['DELETED', $productNumber];
     sqlsrv_query($conn, $logSql, $logParams);
 }
 // Free the statement and close the connection
@@ -93,7 +80,7 @@ sqlsrv_close($conn);
     <body>
         <div class="main-container">
             <div class="navigation">
-                    <button onclick="location.href='ManageInventory.php'" class="btn btn-secondary">
+                    <button onclick="location.href='TrackPO.php'" class="btn btn-secondary">
                         Go Back
                     </button>
                     <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">

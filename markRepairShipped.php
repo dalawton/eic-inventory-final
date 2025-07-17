@@ -1,7 +1,30 @@
 <?php
-// Creates connection to the host, references the .env file to add additional security to the server
-// If any of the login information for the server changes, update in .env file.
-require_once __DIR__ . '/vendor/autoload.php';      // This acts as a bridge from this file to the .env file to get the information stored in the .env file.
+
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
+/**
+ * File set the status of a chosen repair to be shipped (AKA completed)
+ * as well as send an email with confirmation
+ *
+ * PHP version 8
+ *
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category  Change_Files
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
+ */
+
+// phpcs:disable Generic.Files.LineLength.TooLong
+
+require_once __DIR__ . '/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
@@ -12,7 +35,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Database connection parameters
-    // This stores all the server information in variables which are local to this specific file
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
@@ -35,8 +57,15 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-
-function sendRepairEmail($formData) {
+/**
+ * This is an function that sends an Email after submission of previous form
+ *
+ * @param string $formData responses from previous form
+ *
+ * @return string Return either success or failure
+ */
+function sendRepairEmail($formData)
+{
     // Create a new PHPMailer instance
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
@@ -50,7 +79,7 @@ function sendRepairEmail($formData) {
         $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        
+
         // Prevent hanging
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
@@ -64,7 +93,7 @@ function sendRepairEmail($formData) {
         // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
-    
+
         // Add CC if specified
         if (!empty($_ENV['CC_EMAIL'])) {
             $mail->addCC($_ENV['CC_EMAIL']);
@@ -84,13 +113,20 @@ function sendRepairEmail($formData) {
         // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Purchase order email sent successfully'];
-        
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Email could not be sent. Error: ' . $mail->ErrorInfo];
     }
 }
 
-function generateRepairEmailBody($formData) {
+/**
+ * This is a function to generage the body of the email
+ *
+ * @param string $formData responses from prior form
+ *
+ * @return string Return body of email in html form
+ */
+function generateRepairEmailBody($formData)
+{
     $html = '
     <!DOCTYPE html>
     <html lang="en">
@@ -205,10 +241,18 @@ function generateRepairEmailBody($formData) {
     return $html;
 }
 
-function generatePlainTextVersion($formData) {
+/**
+ * This is a function to make the plain text version of the email
+ *
+ * @param string $formData responses from the prior form
+ *
+ * @return string Return body of email in plain text form
+ */
+function generatePlainTextVersion($formData)
+{
     $text = "Repair - Received Part\n";
     $text .= "================================\n\n";
-    
+
     $text .= "Serial Number: " . ($formData['serialNumber'] ?? 'N/A') . "\n";
     $text .= "Date Shipped: " . ($formData['shippingDate'] ?? 'N/A') . "\n";
     $text .= "Shipping Location: " . ($formData['shippingLocation'] ?? 'N/A') . "\n";
@@ -216,7 +260,7 @@ function generatePlainTextVersion($formData) {
 
     // Vendor Information
     $text .= "REPAIR DETAILS:\n";
-    
+
     if (!empty($formData['details'])) {
         $text .= "Repair Notes: " . $formData['details'] . "\n";
     }
@@ -229,13 +273,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serialNum = $formData['serialNumber'];
     $shippingDate = $formData['shippingDate'];
     $repairNotes = $formData['details'] ?? '';
-    $shippingLocation =$formData['shippingLocation'];
+    $shippingLocation = $formData['shippingLocation'];
     // Marks Repair as Shipped/Completed
     $updateRepair = sqlsrv_query($conn, "UPDATE dbo.Repairs SET Status = 'Completed' WHERE SerialNumber = ?", [$serialNum]);
     $updateDate = sqlsrv_query($conn, "UPDATE dbo.Repairs SET DateShipped = '$shippingDate' WHERE SerialNumber = ?", [$serialNum]);
     $updateDetails = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingDetails = '$repairNotes' WHERE SerialNumber = ?", [$serialNum]);
     $updateLocation = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingLocation = '$shippingLocation' WHERE SerialNumber = ?", [$serialNum]);
-    
+
     // After updating Repairs table
     $logSql = "INSERT INTO dbo.InventoryLog 
         (ActionType, TableAffected, RepairSerialNumber, RepairRequester, RepairDetails, RepairStatus) 
@@ -251,4 +295,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     sqlsrv_close($conn);
 }
-?>

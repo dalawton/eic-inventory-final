@@ -1,7 +1,30 @@
 <?php
-// Creates connection to the host, references the .env file to add additional security to the server
-// If any of the login information for the server changes, update in .env file.
-require_once __DIR__ . '/vendor/autoload.php';      // This acts as a bridge from this file to the .env file to get the information stored in the .env file.
+
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
+/**
+ * Form to subtract parts from the selected completed battery from the
+ * inventory table.
+ *
+ * PHP version 8
+ *
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category  Submit_File
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
+ */
+
+// phpcs:disable Generic.Files.LineLength.TooLong
+
+require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
 // Load environment variables (from .env)
@@ -9,7 +32,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Database connection parameters
-    // This stores all the server information in variables which are local to this specific file
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
@@ -45,7 +67,7 @@ if ($stmt === false) {
 $selectedBattery = $_GET['batteryName'] ?? null;
 $items = [];
 if ($selectedBattery) {
-    $batteryIDstmt = sqlsrv_query($conn, "SELECT BatteryId FROM dbo.Battery WHERE Name = ?", [$selectedBattery]);
+    $batteryIDstmt = sqlsrv_query($conn, "SELECT BatteryId FROM dbo.Battery WHERE Name = ?", [$selectedBattery]); // phpcs:ignore
     $batteryIDrow = sqlsrv_fetch_array($batteryIDstmt, SQLSRV_FETCH_ASSOC);
     $batteryID = $batteryIDrow['BatteryId'] ?? null;
     if ($batteryID) {
@@ -66,14 +88,21 @@ sqlsrv_close($conn);
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- Sets the default character alphabet, the default screen size and links to the style sheet with additional formatting -->
+        <!-- Sets the default character alphabet, the default screen size and links 
+            to the style sheet with additional formatting --> 
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="styleCheckout.css">
         <title>Submit Completed Battery</title>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script 
+            src="https://code.jquery.com/jquery-3.6.0.min.js">
+        </script>
+        <link 
+            href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" 
+            rel="stylesheet" /> 
+        <script 
+            src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js">
+        </script>
     </head>
     <body>
         <div class="main-container">
@@ -88,13 +117,20 @@ sqlsrv_close($conn);
                         <label for="batteryName">Select Battery:</label>
                         <select name="batteryName" class="form-control" id="batteryName">
                             <option value="">--Select Battery--</option>
-                            <?php foreach ($batteryOptions as $Name): ?>
-                            <option value="<?= htmlspecialchars($Name) ?>" <?= $selectedBattery === $Name ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($Name) ?>
+                            <?php foreach ($batteryOptions as $Name) : ?>
+                            <option value="<?php echo htmlspecialchars($Name) ?>" 
+                                <?php echo $selectedBattery === $Name ? 'selected' : '' ?>> 
+                                <?php echo htmlspecialchars($Name) ?>
                             </option>
                             <?php endforeach; ?>
-                            <option value="uncompleteBattery" <?= $selectedBattery === 'uncompleteBattery' ? 'selected' : '' ?>>Log completed step</option>
-                            <option value="newBattery" <?= $selectedBattery === 'newBattery' ? 'selected' : '' ?>>Create a New Battery Option</option>
+                            <option value="uncompleteBattery" 
+                                <?php echo $selectedBattery === 'uncompleteBattery' ? 'selected' : '' ?>>
+                                    Log completed step
+                                </option>
+                            <option value="newBattery" 
+                                <?php echo $selectedBattery === 'newBattery' ? 'selected' : '' ?>>
+                                    Create a New Battery Option
+                            </option>
                         </select>
 
                         <script>
@@ -106,9 +142,11 @@ sqlsrv_close($conn);
                 </form>
                 <div class="form-section">
                     <!-- Existing Battery Form -->
-                    <form id="existingBatteryForm" class="battery-form" method="POST" action="updateInventoryComplete.php" style="display:none;">
+                    <form id="existingBatteryForm" class="battery-form" method="POST" 
+                        action="updateInventoryComplete.php" style="display:none;">
                         <div class="table-header">
-                            <h2>Parts Used for Battery <?= htmlspecialchars($selectedBattery) ?> </h2>
+                            <h2>Parts Used for Battery 
+                                <?php echo htmlspecialchars($selectedBattery) ?> </h2>
                         </div>
                         <div class="desc-info">
                             <p>Update the amount used of each part for the completed battery</p>
@@ -116,18 +154,22 @@ sqlsrv_close($conn);
                             <p>Add not listed parts at the bottom if used</p>
                             <p>Include the serial number of the create battery and submit form</p>
                         </div>
-                        <input type="hidden" name="selectedBattery" value="<?= htmlspecialchars($selectedBattery) ?>">
+                        <input type="hidden" name="selectedBattery" 
+                            value="<?php echo htmlspecialchars($selectedBattery) ?>">
                         <table class="product-table" border="1">
                             <tr>
                                 <th>Part Number</th>
                                 <th>Description</th>
                                 <th>Amount Used</th>
                             </tr>
-                            <?php foreach ($items as $index => $item): ?>
+                            <?php foreach ($items as $index => $item) : ?>
                             <tr>
-                                <td><?= htmlspecialchars($item['PN'] ?? '') ?></td>
-                                <td id="desc-<?= $index ?>"><?= htmlspecialchars($item['Description'] ?? '') ?></td>
-                                <td><input type="number" class="form-control" style="color:#7a7d80" name="amount_Used" value="<?= htmlspecialchars($item['Amount']) ?>"></td>
+                                <td><?php echo htmlspecialchars($item['PN'] ?? '') ?></td>
+                                <td id="desc-<?php echo $index ?>">
+                                    <?php echo htmlspecialchars($item['Description'] ?? '') ?></td>
+                                <td><input type="number" class="form-control" style="color:#7a7d80"
+                                    name="amount_Used" 
+                                    value="<?php echo htmlspecialchars($item['Amount']) ?>"></td>
                             </tr>
                             <?php endforeach; ?>
                             <!-- Add Part Section -->

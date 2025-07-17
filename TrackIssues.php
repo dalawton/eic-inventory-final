@@ -1,4 +1,28 @@
 <?php
+
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
+/**
+ * File to see all submitted issues and their respective statuses
+ *
+ * PHP version 8
+ *
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category  Get_Files
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
+ */
+
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
@@ -36,7 +60,7 @@ if ($stmt === false) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styleTracking.css">
+    <link rel="stylesheet" href="styleIssueReport.css">
     <title>Track Issues</title>
 </head>
 <body>
@@ -55,18 +79,16 @@ if ($stmt === false) {
                         <th>IssueID</th>
                         <th>Type of Request</th>
                         <th>Date Submitted</th>
-                        <th>Requestor</th>
                         <th>Details</th>
                         <th>Status</th>
                     </tr>
-                    <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)): ?>
+                    <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
                         <tr>
-                            <td><?= htmlspecialchars($row['IssueID']) ?></td>
-                            <td><?= htmlspecialchars($row['TypeRequest']) ?></td>
-                            <td><?= htmlspecialchars(($row['Date'])->format('Y-m-d H:i:s')) ?></td>
-                            <td><?= htmlspecialchars($row['Requestor'] ?? '') ?></td> <!-- The "?? '' "  allows null values to be displayed correctly -->
-                            <td><?= htmlspecialchars($row['Details']) ?></td>
-                            <td><?= htmlspecialchars($row['Status']) ?></td>
+                            <td><?php echo htmlspecialchars($row['IssueID']) ?></td>
+                            <td><?php echo htmlspecialchars($row['TypeRequest']) ?></td>
+                            <td><?php echo htmlspecialchars(($row['Date'])->format('Y-m-d H:i:s')) ?></td>
+                            <td><?php echo htmlspecialchars($row['Details']) ?></td>
+                            <td><?php echo htmlspecialchars($row['Status']) ?></td>
                         </tr>
                     <?php endwhile; ?>
                 </table>

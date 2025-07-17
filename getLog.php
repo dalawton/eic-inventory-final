@@ -1,4 +1,28 @@
 <?php
+
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
+/**
+ * File to display a log of all the interactions on the website
+ *
+ * PHP version 8
+ *
+ * LICENSE: This source file is subject to version 3.01 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category  Get_Files
+ * @package   None
+ * @author    Danielle Lawton <daniellelawton8@gmail.com>
+ * @copyright 1999 - 2019 The PHP Group
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      https://pear.php.net/package/None
+ */
+
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
@@ -108,12 +132,16 @@ $stmt = sqlsrv_query($conn, $sql);
                             $actionType = strtolower($row['ActionType']);
                             $tableType = strtolower($row['TableAffected'] ?? '');
                             $actionClass = "action-other";
-                            if ($actionType === "add") $actionClass = "action-add";
-                            elseif ($actionType === "update") $actionClass = "action-update";
-                            elseif ($actionType === "delete") $actionClass = "action-delete";
+                            if ($actionType === "add") {
+                                $actionClass = "action-add";
+                            } elseif ($actionType === "update") {
+                                $actionClass = "action-update";
+                            } elseif ($actionType === "delete") {
+                                $actionClass = "action-delete";
+                            }
                             $tableClass = $tableType === "repairs" ? "table-repairs" : "table-inventory";
                             echo "<tr" . ($isReverted ? " class='reverted'" : "") . ">";
-                            echo "<td>" . htmlspecialchars($row['ActionTime']->format('Y-m-d H:i:s')) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['ActionTime']->format('Y-m-d')) . "</td>";
                             echo "<td><span class='action-label $actionClass'>" . htmlspecialchars(ucfirst($row['ActionType'])) . "</span></td>";
                             echo "<td><span class='$tableClass'>" . htmlspecialchars($row['TableAffected'] ?? '') . "</span></td>";
                             echo "<td>" . htmlspecialchars($row['ProductNumber'] ?? '') . "</td>";
