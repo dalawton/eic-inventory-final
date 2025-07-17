@@ -126,6 +126,18 @@ if ($stmt === false) {
             width: 100px;
             text-align: center;
         }
+
+        .product-table td span.status-label {
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.95em;
+        }
+
+        .product-table td span.status-ordered { background: #2196f3; }
+        .product-table td span.status-received { background: #4caf50; }
+        .product-table td span.status-cancelled { background: #f44336; }
+        .product-table td span.status-other { background: #888; }
     </style>
 </head>
 <body>
@@ -161,10 +173,24 @@ if ($stmt === false) {
                             // Output the first row
                             echo "<tr class='text'>";
                             foreach ($row as $colName => $value) {
+                                $statusType = strtolower($row['Status']);
+                                $statusClass = "status-other";
+                                if ($statusType === "ordered") {
+                                    $statusClass = "status-ordered";
+                                } elseif ($statusType === "received") {
+                                    $statusClass = "status-received";
+                                } elseif ($statusType === "cancelled") {
+                                    $statusClass = "status-cancelled";
+                                } else {
+                                    $statusClass = "status-other";
+                                }
+
                                 if ($value instanceof DateTime) {
                                     echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
                                 } elseif (strtolower($colName) === 'price') {
                                     echo "<td>$" . number_format((float)$value, 2) . "</td>";
+                                } elseif (strtolower($colName) === 'status') {
+                                    echo "<td><span class='status-label $statusClass'>" . htmlspecialchars(ucfirst($row['Status'])) . "</span></td>";
                                 } else {
                                     echo "<td>" . htmlspecialchars((string)$value) . "</td>";
                                 }
@@ -175,10 +201,24 @@ if ($stmt === false) {
                             while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                                 echo "<tr class='text'>";
                                 foreach ($row as $colName => $value) {
+                                    $statusType = strtolower($row['Status']);
+                                    $statusClass = "status-other";
+                                    if ($statusType === "ordered") {
+                                        $statusClass = "status-ordered";
+                                    } elseif ($statusType === "received") {
+                                        $statusClass = "status-received";
+                                    } elseif ($statusType === "cancelled") {
+                                        $statusClass = "status-cancelled";
+                                    } else {
+                                        $statusClass = "status-other";
+                                    }
+                                    
                                     if ($value instanceof DateTime) {
                                         echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
                                     } elseif (strtolower($colName) === 'price') {
                                         echo "<td>$" . number_format((float)$value, 2) . "</td>";
+                                    } elseif (strtolower($colName) === 'status') {
+                                        echo "<td><span class='status-label $statusClass'>" . htmlspecialchars(ucfirst($row['Status'])) . "</span></td>";
                                     } else {
                                         echo "<td>" . htmlspecialchars((string)$value) . "</td>";
                                     }

@@ -141,7 +141,7 @@ $stmt = sqlsrv_query($conn, $sql);
                             }
                             $tableClass = $tableType === "repairs" ? "table-repairs" : "table-inventory";
                             echo "<tr" . ($isReverted ? " class='reverted'" : "") . ">";
-                            echo "<td>" . htmlspecialchars($row['ActionTime']->format('Y-m-d H:i:s')) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['ActionTime']->format('Y-m-d')) . "</td>";
                             echo "<td><span class='action-label $actionClass'>" . htmlspecialchars(ucfirst($row['ActionType'])) . "</span></td>";
                             echo "<td><span class='$tableClass'>" . htmlspecialchars($row['TableAffected'] ?? '') . "</span></td>";
                             echo "<td>" . htmlspecialchars($row['ProductNumber'] ?? '') . "</td>";

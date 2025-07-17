@@ -153,7 +153,19 @@ $stmt = sqlsrv_query($conn, $sql);
             .product-table tr:hover td {
                 background: #f8f9ff;
             }
-            
+
+            .product-table td span.status-label {
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.95em;
+            }
+
+            .product-table td span.status-received { background: #2196f3; }
+            .product-table td span.status-completed { background: #4caf50; }
+            .product-table td span.status-cancelled { background: #f44336; }
+            .product-table td span.status-other { background: #888; }
+                
             @media (max-width: 1200px) {
                 .product-table th,
                 .product-table td {
@@ -215,8 +227,21 @@ $stmt = sqlsrv_query($conn, $sql);
                                 // Output the first row
                                 echo "<tr>";
                                 foreach ($row as $value) {
+                                    $statusClass = "status-other";
+                                    if ($value === "Received") {
+                                        $statusClass = "status-recieved";
+                                    } elseif ($value === "Completed") {
+                                        $statusClass = "status-completed";
+                                    } elseif ($value === "Cancelled") {
+                                        $statusClass = "status-cancelled";
+                                    } else {
+                                        $statusClass = "status-other";
+                                    }
+                                    
                                     if ($value instanceof DateTime) {
                                         echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                    } elseif ($statusClass != "status-other") {
+                                        echo "<td><span class='status-label $statusClass'>" . htmlspecialchars((string)$value) . "</span></td>";
                                     } else {
                                         echo "<td>" . htmlspecialchars((string)$value) . "</td>";
                                     }
@@ -227,8 +252,21 @@ $stmt = sqlsrv_query($conn, $sql);
                                 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                                     echo "<tr>";
                                     foreach ($row as $value) {
+                                        $statusClass = "status-other";
+                                        if ($value === "Received") {
+                                            $statusClass = "status-recieved";
+                                        } elseif ($value === "Completed") {
+                                            $statusClass = "status-completed";
+                                        } elseif ($value === "Cancelled") {
+                                            $statusClass = "status-cancelled";
+                                        } else {
+                                            $statusClass = "status-other";
+                                        }
+                                        
                                         if ($value instanceof DateTime) {
                                             echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                        } elseif ($statusClass != "status-other") {
+                                            echo "<td><span class='status-label $statusClass'>" . htmlspecialchars((string)$value) . "</span></td>";
                                         } else {
                                             echo "<td>" . htmlspecialchars((string)$value) . "</td>";
                                         }
