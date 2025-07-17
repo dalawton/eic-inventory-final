@@ -3,16 +3,16 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
- * Form to submit a PO request with all needed information 
- * 
+ * Form to submit a PO request with all needed information
+ *
  * PHP version 8
- * 
+ *
  * LICENSE: This source file is subject to version 3.01 of the PHP license
  * that is available through the world-wide-web at the following URI:
  * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
- * 
+ *
  * @category  Submit_File
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
@@ -20,6 +20,7 @@
  * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
  * @link      https://pear.php.net/package/None
  */
+
 // phpcs:disable Generic.Files.LineLength.TooLong
 // phpcs:disable PEAR.Commenting.FunctionComment.Missing
 
@@ -51,19 +52,19 @@ function getNextPONumber($conn)
 {
     $sql = "SELECT MAX(CAST(PONum AS INT)) as maxPO FROM dbo.POs WHERE ISNUMERIC(PONum) = 1";
     $stmt = sqlsrv_query($conn, $sql);
-    
+
     if ($stmt === false) {
         die("Error getting max PO number: " . print_r(sqlsrv_errors(), true));
     }
-    
+
     $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
     $maxPO = $row['maxPO'];
-    
+
     // If no POs exist or max is less than 60266, start at 60266
     if ($maxPO === null || $maxPO < 60266) {
         return '60266';
     }
-    
+
     // Otherwise, increment by 1
     return strval($maxPO + 1);
 }
@@ -161,7 +162,7 @@ if ($contractStmt === false) {
                         <select name="vendorName" id="vendorName" class="form-control">
                             <option value="">--Select Vendor--</option>
                             <option value="not_listed">Vendor not listed</option>
-                            <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)): ?>
+                            <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
                             <option value="<?php echo htmlspecialchars($row['VendorID']) ?>">
                                 <?php echo htmlspecialchars($row['VendorName']) ?>
                             </option>
@@ -267,7 +268,7 @@ if ($contractStmt === false) {
                             <label for="contractNumber">Charge to Contract #:</label>
                             <select id="contractNumber" name="contractNumber" class="form-control" required>
                                 <option value="">--Select Contract--</option>
-                                <?php while ($cRow = sqlsrv_fetch_array($contractStmt, SQLSRV_FETCH_ASSOC)): ?>
+                                <?php while ($cRow = sqlsrv_fetch_array($contractStmt, SQLSRV_FETCH_ASSOC)) : ?>
                                     <option value="<?php echo htmlspecialchars($cRow['contractNumber']) ?>">
                                         <?php echo htmlspecialchars($cRow['contractNumber']) ?>
                                     </option>

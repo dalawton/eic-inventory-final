@@ -4,15 +4,15 @@
 
 /**
  * File to send email about a submitted issue
- * 
+ *
  * PHP version 8
- * 
+ *
  * LICENSE: This source file is subject to version 3.01 of the PHP license
  * that is available through the world-wide-web at the following URI:
  * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
- * 
+ *
  * @category  Submit_Files
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
@@ -20,6 +20,7 @@
  * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
  * @link      https://pear.php.net/package/None
  */
+
 // phpcs:disable Generic.Files.LineLength.TooLong
 
 use Dotenv\Dotenv;
@@ -62,7 +63,7 @@ try {
     // Enable debug output for testing (remove in production)
     // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
     // $mail->Debugoutput = 'html';
-    
+
     // Server settings
     $mail->isSMTP();
     $mail->Host = 'smtp.office365.com';
@@ -71,7 +72,7 @@ try {
     $mail->Password = $_ENV['SMTP_PASSWORD'];
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
-    
+
     // Prevent hanging
     $mail->Timeout = 30;
     $mail->SMTPOptions = array(
@@ -85,7 +86,7 @@ try {
     // Recipients
     $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
     $mail->addAddress($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
-    
+
     // Add reply-to if form data exists
     if (isset($_POST['email']) && !empty($_POST['email'])) {
         $mail->addReplyTo($_POST['email'], $_POST['name'] ?? '');
@@ -93,12 +94,12 @@ try {
 
     // Content
     $mail->isHTML(true);
-    
+
     // Build subject
     $requestType = $_POST['typeRequest'] ?? 'General Request';
     $submitterName = $_POST['name'] ?? 'Anonymous';
     $mail->Subject = "[$requestType] - $submitterName";
-    
+
     // Build email body
     $body = "<html><body>";
     $body .= "<h2>New Issue Submission</h2>";
@@ -113,9 +114,9 @@ try {
     $body .= nl2br(htmlspecialchars($_POST['message'] ?? 'No message provided'));
     $body .= "</div>";
     $body .= "</body></html>";
-    
+
     $mail->Body = $body;
-    
+
     // Plain text version
     $altBody = "New Issue Submission\n\n";
     $altBody .= "Type: " . ($_POST['typeRequest'] ?? 'Not specified') . "\n";
@@ -123,12 +124,12 @@ try {
     $altBody .= "Email: " . ($_POST['email'] ?? 'Not provided') . "\n";
     $altBody .= "Submitted: " . ($_POST['date'] ?? 'Not provided') . "\n\n";
     $altBody .= "Description:\n" . ($_POST['message'] ?? 'No message provided') . "\n";
-    
+
     $mail->AltBody = $altBody;
 
     // Send the email
     $mail->send();
-    
+
     // Success response
     echo "<!DOCTYPE html>";
     echo "<html><head><title>Success</title></head><body>";
@@ -136,11 +137,10 @@ try {
     echo "<p>Thank you for your submission. We'll get back to you soon.</p>";
     echo "<p><a href='javascript:history.back()'>← Go Back</a></p>";
     echo "</body></html>";
-    
 } catch (Exception $e) {
     // Log the error
     error_log("Mail error: " . $e->getMessage());
-    
+
     // User-friendly error response
     echo "<!DOCTYPE html>";
     echo "<html><head><title>Error</title></head><body>";
@@ -148,14 +148,14 @@ try {
     echo "<p>We're sorry, but there was a problem submitting your request.</p>";
     echo "<p>Please try again later or contact support directly</p>";
     echo "<p><a href='javascript:history.back()'>← Go Back</a></p>";
-    
+
     // Show detailed error only in development
     if (isset($_ENV['APP_DEBUG']) && $_ENV['APP_DEBUG'] === 'true') {
         echo "<details><summary>Technical Details</summary>";
         echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
         echo "</details>";
     }
-    
+
     echo "</body></html>";
 }
 
@@ -174,5 +174,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die(print_r(sqlsrv_errors(), true));
     }
 }
-
-?>

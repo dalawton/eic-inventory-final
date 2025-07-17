@@ -4,15 +4,15 @@
 
 /**
  * File to send information received by the submission of new repair form
- * 
+ *
  * PHP version 8
- * 
+ *
  * LICENSE: This source file is subject to version 3.01 of the PHP license
  * that is available through the world-wide-web at the following URI:
  * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
- * 
+ *
  * @category  Change_Files
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
@@ -20,6 +20,7 @@
  * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
  * @link      https://pear.php.net/package/None
  */
+
 // phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -77,7 +78,7 @@ function sendRepairEmail($formData)
         $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        
+
         // Prevent hanging
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
@@ -92,7 +93,7 @@ function sendRepairEmail($formData)
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
-    
+
         // Add CC if specified
         if (!empty($_ENV['CC_EMAIL'])) {
             $mail->addCC($_ENV['CC_EMAIL']);
@@ -112,7 +113,6 @@ function sendRepairEmail($formData)
         // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Purchase order email sent successfully'];
-        
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Email could not be sent. Error: ' . $mail->ErrorInfo];
     }
@@ -264,7 +264,7 @@ function generatePlainTextVersion($formData)
 {
     $text = "Repair - Received Part\n";
     $text .= "================================\n\n";
-    
+
     $text .= "Serial Number: " . ($formData['productSerialNumber'] ?? 'N/A') . "\n";
     $text .= "Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
     $text .= "Submitted: " . date('Y-m-d H:i:s') . "\n\n";
@@ -274,7 +274,7 @@ function generatePlainTextVersion($formData)
     $text .= "Customer Name: " . ($formData['customerName'] ?? 'N/A') . "\n";
     $text .= "Received Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
     $text .= "Receiver Name: " . ($formData['receivedBy'] ?? 'N/A') . "\n";
-    
+
     if (!empty($formData['issueDescription'])) {
         $text .= "Issue Description: " . $formData['issueDescription'] . "\n";
     }
@@ -328,4 +328,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // frees up the $stmt variable and closes the connection to allow for additional statements and security for the server
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
-?>

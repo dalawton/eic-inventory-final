@@ -5,15 +5,15 @@
 /**
  * File set the status of a chosen repair to be shipped (AKA completed)
  * as well as send an email with confirmation
- * 
+ *
  * PHP version 8
- * 
+ *
  * LICENSE: This source file is subject to version 3.01 of the PHP license
  * that is available through the world-wide-web at the following URI:
  * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
- * 
+ *
  * @category  Change_Files
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
@@ -21,6 +21,7 @@
  * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
  * @link      https://pear.php.net/package/None
  */
+
 // phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -78,7 +79,7 @@ function sendRepairEmail($formData)
         $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        
+
         // Prevent hanging
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
@@ -92,7 +93,7 @@ function sendRepairEmail($formData)
         // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
-    
+
         // Add CC if specified
         if (!empty($_ENV['CC_EMAIL'])) {
             $mail->addCC($_ENV['CC_EMAIL']);
@@ -112,7 +113,6 @@ function sendRepairEmail($formData)
         // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Purchase order email sent successfully'];
-        
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Email could not be sent. Error: ' . $mail->ErrorInfo];
     }
@@ -252,7 +252,7 @@ function generatePlainTextVersion($formData)
 {
     $text = "Repair - Received Part\n";
     $text .= "================================\n\n";
-    
+
     $text .= "Serial Number: " . ($formData['serialNumber'] ?? 'N/A') . "\n";
     $text .= "Date Shipped: " . ($formData['shippingDate'] ?? 'N/A') . "\n";
     $text .= "Shipping Location: " . ($formData['shippingLocation'] ?? 'N/A') . "\n";
@@ -260,7 +260,7 @@ function generatePlainTextVersion($formData)
 
     // Vendor Information
     $text .= "REPAIR DETAILS:\n";
-    
+
     if (!empty($formData['details'])) {
         $text .= "Repair Notes: " . $formData['details'] . "\n";
     }
@@ -273,13 +273,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serialNum = $formData['serialNumber'];
     $shippingDate = $formData['shippingDate'];
     $repairNotes = $formData['details'] ?? '';
-    $shippingLocation =$formData['shippingLocation'];
+    $shippingLocation = $formData['shippingLocation'];
     // Marks Repair as Shipped/Completed
     $updateRepair = sqlsrv_query($conn, "UPDATE dbo.Repairs SET Status = 'Completed' WHERE SerialNumber = ?", [$serialNum]);
     $updateDate = sqlsrv_query($conn, "UPDATE dbo.Repairs SET DateShipped = '$shippingDate' WHERE SerialNumber = ?", [$serialNum]);
     $updateDetails = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingDetails = '$repairNotes' WHERE SerialNumber = ?", [$serialNum]);
     $updateLocation = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingLocation = '$shippingLocation' WHERE SerialNumber = ?", [$serialNum]);
-    
+
     // After updating Repairs table
     $logSql = "INSERT INTO dbo.InventoryLog 
         (ActionType, TableAffected, RepairSerialNumber, RepairRequester, RepairDetails, RepairStatus) 
@@ -295,4 +295,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     sqlsrv_close($conn);
 }
-?>

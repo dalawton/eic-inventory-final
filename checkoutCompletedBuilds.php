@@ -5,15 +5,15 @@
 /**
  * Form to subtract parts from the selected completed battery from the
  * inventory table.
- * 
+ *
  * PHP version 8
- * 
+ *
  * LICENSE: This source file is subject to version 3.01 of the PHP license
  * that is available through the world-wide-web at the following URI:
  * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
- * 
+ *
  * @category  Submit_File
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
@@ -21,6 +21,7 @@
  * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
  * @link      https://pear.php.net/package/None
  */
+
 // phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -116,7 +117,7 @@ sqlsrv_close($conn);
                         <label for="batteryName">Select Battery:</label>
                         <select name="batteryName" class="form-control" id="batteryName">
                             <option value="">--Select Battery--</option>
-                            <?php foreach ($batteryOptions as $Name): ?>
+                            <?php foreach ($batteryOptions as $Name) : ?>
                             <option value="<?php echo htmlspecialchars($Name) ?>" 
                                 <?php echo $selectedBattery === $Name ? 'selected' : '' ?>> 
                                 <?php echo htmlspecialchars($Name) ?>
@@ -161,7 +162,7 @@ sqlsrv_close($conn);
                                 <th>Description</th>
                                 <th>Amount Used</th>
                             </tr>
-                            <?php foreach ($items as $index => $item): ?>
+                            <?php foreach ($items as $index => $item) : ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($item['PN'] ?? '') ?></td>
                                 <td id="desc-<?php echo $index ?>">

@@ -5,15 +5,15 @@
 /**
  * File to submit the information from the PO and send an email notifying
  * as well as update to PO table in database
- * 
+ *
  * PHP version 8
- * 
+ *
  * LICENSE: This source file is subject to version 3.01 of the PHP license
  * that is available through the world-wide-web at the following URI:
  * http://www.php.net/license/3_01.txt.  If you did not receive a copy of
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
- * 
+ *
  * @category  Submit_Files
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
@@ -21,6 +21,7 @@
  * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
  * @link      https://pear.php.net/package/None
  */
+
 // phpcs:disable Generic.Files.LineLength.TooLong
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -80,7 +81,7 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        
+
         // Prevent hanging
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
@@ -112,7 +113,6 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Purchase order email sent successfully'];
-        
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Email could not be sent. Error: ' . $mail->ErrorInfo];
     }
@@ -251,14 +251,14 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
         <div class="section">
             <h3>Special Requests</h3>
             <div class="checkbox-section">';
-        
+
         if (!empty($formData['needWorkOrder'])) {
             $html .= '<span class="checkbox-item">✓ Need Work Order</span>';
         }
         if (!empty($formData['confirming'])) {
             $html .= '<span class="checkbox-item">✓ Confirming - DO NOT DUPLICATE</span>';
         }
-        
+
         $html .= '</div></div>';
     }
 
@@ -305,7 +305,7 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
         <div class="info-grid">
             <div class="info-item">
                 <span class="info-label">Payment Method:</span><br>';
-    
+
     $paymentMethods = [];
     if (!empty($formData['citizensBank'])) {
         $paymentMethods[] = 'Citizens Bank m/c';
@@ -313,14 +313,14 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
     if (!empty($formData['employeeReimbursement'])) {
         $paymentMethods[] = 'Employee Reimbursement';
     }
-    
+
     $html .= !empty($paymentMethods) ? implode(', ', $paymentMethods) : 'Not specified';
-    
+
     $html .= '
             </div>
             <div class="info-item">
                 <span class="info-label">Order Type:</span><br>';
-    
+
     $orderTypes = [];
     if (!empty($formData['placeByRequester'])) {
         $orderTypes[] = 'Order Placed By Requestor';
@@ -328,19 +328,19 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
     if (!empty($formData['needPlaced'])) {
         $orderTypes[] = 'Order Needs to be Placed';
     }
-    
+
     $html .= !empty($orderTypes) ? implode(', ', $orderTypes) : 'Not specified';
-    
+
     $html .= '
             </div>
             <div class="info-item">
                 <span class="info-label">Contract Number:</span><br>
                 ' . htmlspecialchars($formData['contractNumber'] ?? 'N/A');
-    
+
     if (!empty($formData['otherContractNumber'])) {
         $html .= ' - ' . htmlspecialchars($formData['otherContractNumber']);
     }
-    
+
     $html .= '
             </div>
             <div class="info-item">
@@ -377,12 +377,12 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
             $unitPrice = floatval($product['unitPrice'] ?? 0);
             $quantity = intval($product['quantity'] ?? 0);
             $total = floatval($product['total'] ?? 0);
-            
+
             // If total is 0, calculate it
             if ($total == 0) {
                 $total = $unitPrice * $quantity;
             }
-            
+
             $grandTotal += $total;
 
             $html .= '
@@ -433,7 +433,7 @@ function generatePlainTextVersion($formData, $products)
 {
     $text = "PURCHASE ORDER REQUISITION FORM\n";
     $text .= "================================\n\n";
-    
+
     $text .= "PO Number: " . ($formData['purchaseOrderNumber'] ?? 'N/A') . "\n";
     $text .= "Date: " . ($formData['date'] ?? 'N/A') . "\n";
     $text .= "Submitted: " . date('Y-m-d H:i:s') . "\n\n";
@@ -454,7 +454,7 @@ function generatePlainTextVersion($formData, $products)
     $text .= "VENDOR INFORMATION:\n";
     $text .= "Vendor ID: " . ($formData['vendorID'] ?? $formData['otherVendorID'] ?? 'N/A') . "\n";
     $text .= "Vendor Name: " . ($formData['otherName'] ?? 'Selected from database') . "\n";
-    
+
     if (!empty($formData['streetAddress'])) {
         $text .= "Address: " . $formData['streetAddress'] . "\n";
     }
@@ -494,13 +494,13 @@ function generatePlainTextVersion($formData, $products)
             $unitPrice = floatval($product['unitPrice'] ?? 0);
             $quantity = intval($product['quantity'] ?? 0);
             $total = floatval($product['total'] ?? 0);
-            
+
             if ($total == 0) {
                 $total = $unitPrice * $quantity;
             }
-            
+
             $grandTotal += $total;
-            
+
             $text .= sprintf(
                 "%-15s %-30s %-8s $%-11s $%-11s\n",
                 substr($product['productNumber'] ?? '', 0, 15),
@@ -510,7 +510,7 @@ function generatePlainTextVersion($formData, $products)
                 number_format($total, 2)
             );
         }
-        
+
         $text .= str_repeat("-", 80) . "\n";
         $text .= sprintf("%56s $%-11s\n", "GRAND TOTAL:", number_format($grandTotal, 2));
     }
@@ -518,7 +518,7 @@ function generatePlainTextVersion($formData, $products)
     $text .= "\n\n";
     $text .= "APPROVAL SIGNATURES:\n";
     $text .= str_repeat("=", 50) . "\n\n";
-    
+
     $text .= "APPROVAL:\n";
     $text .= "Signature: _________________________________ Date: __________\n";
     $text .= "Print Name: _____________________________\n";
@@ -532,7 +532,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Debug: Log received data
     error_log("Received products JSON: " . $formData['productsJSON']);
-    
+
     $final_total = 0.00;
     $processedProducts = [];
 
@@ -540,7 +540,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $productNumber = $product['productNumber'] ?? '';
         $description = $product['description'] ?? '';
         $quantity = isset($product['quantity']) ? intval($product['quantity']) : 0;
-        
+
         // Better price parsing - handle both string and numeric values
         $unitPrice = 0.00;
         if (isset($product['unitPrice'])) {
@@ -551,7 +551,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $unitPrice = floatval($product['unitPrice']);
             }
         }
-        
+
         // Calculate total (don't rely on frontend calculation)
         $lineTotal = round($quantity * $unitPrice, 2);
         $final_total += $lineTotal;
@@ -645,11 +645,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Send email
     $result = sendPurchaseOrderEmail($formData, $processedProducts, $vendorDetails);
-    
+
     if ($result['success']) {
         echo "Purchase order submitted successfully! Total: $" . number_format($final_total, 2) . ". Email sent.";
     } else {
         echo "Purchase order submitted but email failed: " . $result['message'];
     }
 }
-?>
