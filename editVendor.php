@@ -53,9 +53,7 @@ $conn = sqlsrv_connect($serverName, $connectionOptions);
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
-
-$vendorID = $_POST['vendorID'];
-$newVendorID = $_POST['vendorIDFix'];
+$vendorName = $_POST['vendorName'];
 $newVendorName = $_POST['vendorNameFix'];
 $newVendorPhone = $_POST['vendorPhoneFix'];
 $newVendorAddress = $_POST['vendorAddressFix'];
@@ -63,19 +61,9 @@ $newVendorCitySTZIP = $_POST['vendorCitySTZIPFix'];
 $newContactName = $_POST['contactNameFix'];
 $newContactEmail = $_POST['contactEmailFix'];
 
-if (!empty($newVendorID)) {
-    $sql = "UPDATE dbo.Vendors SET VendorID='$newVendorID' WHERE VendorID='$vendorID'";
-    $stmt = sqlsrv_query($conn, $sql);
-    if ($stmt === false) {
-        die(print_r(sqlsrv_errors(), true));
-    }
-    $vendorID = $newVendorID;
-    sqlsrv_free_stmt($stmt);
-    echo "VendorID updated successfully! \n";
-}
 
 if (!empty($newVendorName)) {
-    $sql = "UPDATE dbo.Vendors SET VendorName='$newVendorName' WHERE VendorID='$vendorID'";
+    $sql = "UPDATE dbo.Vendors SET VendorName='$newVendorName' WHERE VendorName='$vendorName'";
     $stmt = sqlsrv_query($conn, $sql);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -85,7 +73,7 @@ if (!empty($newVendorName)) {
 }
 
 if (!empty($newVendorPhone)) {
-    $sql = "UPDATE dbo.Vendors SET Telephone='$newVendorPhone' WHERE VendorID='$vendorID'";
+    $sql = "UPDATE dbo.Vendors SET Telephone='$newVendorPhone' WHERE VendorName='$vendorName'";
     $stmt = sqlsrv_query($conn, $sql);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -95,7 +83,7 @@ if (!empty($newVendorPhone)) {
 }
 
 if (!empty($newVendorAddress)) {
-    $sql = "UPDATE dbo.Vendors SET AddressLine1='$newVendorAddress' WHERE VendorID='$vendorID'";
+    $sql = "UPDATE dbo.Vendors SET AddressLine1='$newVendorAddress' WHERE VendorName='$vendorName'";
     $stmt = sqlsrv_query($conn, $sql);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -105,7 +93,7 @@ if (!empty($newVendorAddress)) {
 }
 
 if (!empty($newVendorCitySTZIP)) {
-    $sql = "UPDATE dbo.Vendors SET CitySTZIP='$newVendorCitySTZIP' WHERE VendorID='$vendorID'";
+    $sql = "UPDATE dbo.Vendors SET CitySTZIP='$newVendorCitySTZIP' WHERE VendorName='$vendorName'";
     $stmt = sqlsrv_query($conn, $sql);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -115,7 +103,7 @@ if (!empty($newVendorCitySTZIP)) {
 }
 
 if (!empty($newContactName)) {
-    $sql = "UPDATE dbo.Vendors SET ContactName='$newContactName' WHERE VendorID='$vendorID'";
+    $sql = "UPDATE dbo.Vendors SET ContactName='$newContactName' WHERE VendorName='$vendorName'";
     $stmt = sqlsrv_query($conn, $sql);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -125,7 +113,7 @@ if (!empty($newContactName)) {
 }
 
 if (!empty($newContactEmail)) {
-    $sql = "UPDATE dbo.Vendors SET ContactEmail='$newContactEmail' WHERE VendorID='$vendorID'";
+    $sql = "UPDATE dbo.Vendors SET ContactEmail='$newContactEmail' WHERE VendorName='$vendorName'";
     $stmt = sqlsrv_query($conn, $sql);
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));

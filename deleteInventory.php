@@ -30,7 +30,8 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters$serverName = $_ENV['DB_HOST'];
+// Database connection parameters
+$serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
@@ -76,8 +77,8 @@ if ($stmt === false) {
 } else {
     echo "Record deleted successfully.";
     // Log the action
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity) VALUES (?, ?, ?, ?)";
-    $logParams = ['delete', $productNumber, $details, $amount];
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Quantity, Description) VALUES (?, ?, ?, ?)";
+    $logParams = ['delete', $productNumber, $amount, $details];
     sqlsrv_query($conn, $logSql, $logParams);
 }
 // Free the statement and close the connection

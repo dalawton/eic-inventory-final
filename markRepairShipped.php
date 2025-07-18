@@ -258,7 +258,7 @@ function generatePlainTextVersion($formData)
     $text .= "Shipping Location: " . ($formData['shippingLocation'] ?? 'N/A') . "\n";
     $text .= "Submitted: " . date('Y-m-d H:i:s') . "\n\n";
 
-    // Vendor Information
+    // Repair Information
     $text .= "REPAIR DETAILS:\n";
 
     if (!empty($formData['details'])) {

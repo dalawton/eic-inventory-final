@@ -269,7 +269,7 @@ function generatePlainTextVersion($formData)
     $text .= "Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
     $text .= "Submitted: " . date('Y-m-d H:i:s') . "\n\n";
 
-    // Vendor Information
+    // Repair Information
     $text .= "REPAIR INFORMATION:\n";
     $text .= "Customer Name: " . ($formData['customerName'] ?? 'N/A') . "\n";
     $text .= "Received Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";

@@ -97,6 +97,7 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['PATSY_EMAIL'], 'Patricia Riley');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
+        $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
         // $mail->addCC('', '');
 
         // Content
@@ -130,8 +131,7 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
 function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [])
 {
     // Use DB values if found, otherwise fallback to form data
-    $vendorID = $vendorDetails['vendorID'] ?? $formData['vendorID'] ?? $formData['otherVendorID'] ?? 'N/A';
-    $vendorName = $vendorDetails['VendorName'] ?? $formData['otherName'] ?? 'N/A';
+    $vendorName = $vendorDetails['VendorName'] ?? $formData['otherName'] ?? $formData['VendorName'] ?? 'N/A';
     $telephone = $vendorDetails['Telephone'] ?? $formData['vendorPhone'] ?? 'N/A';
     $contactName = $vendorDetails['ContactName'] ?? $formData['contactName'] ?? 'N/A';
     $contactEmail = $vendorDetails['ContactEmail'] ?? $formData['contactEmail'] ?? 'N/A';
@@ -267,10 +267,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
     <div class="section">
         <h3>Vendor Information</h3>
         <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Vendor ID:</span><br>
-                ' . htmlspecialchars($vendorID) . '
-            </div>
             <div class="info-item">
                 <span class="info-label">Vendor Name:</span><br>
                 ' . htmlspecialchars($vendorName) . '
@@ -452,8 +448,7 @@ function generatePlainTextVersion($formData, $products)
 
     // Vendor Information
     $text .= "VENDOR INFORMATION:\n";
-    $text .= "Vendor ID: " . ($formData['vendorID'] ?? $formData['otherVendorID'] ?? 'N/A') . "\n";
-    $text .= "Vendor Name: " . ($formData['otherName'] ?? 'Selected from database') . "\n";
+    $text .= "Vendor Name: " . ($formData['vendorName'] ?? $formData['otherName'] ?? 'N/A') . "\n";
 
     if (!empty($formData['streetAddress'])) {
         $text .= "Address: " . $formData['streetAddress'] . "\n";
@@ -572,7 +567,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("Final total calculated: " . $final_total);
 
     $purchaseOrderNumber = $formData['purchaseOrderNumber'];
-    $vendorID = $formData['vendorID'];
+    $vendorName = $formData['vendorName'];
     $orderDate = $formData['date'];
     $requestor = $formData['requestorName'];
     $contractNumber = $formData['otherContractNumber'];
@@ -586,8 +581,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Add new vendor if needed
     if (!empty($otherName)) {
-        $sql = "INSERT INTO dbo.Vendors (VendorID, VendorName, Telephone, AddressLine1, CitySTZIP) VALUES (?, ?, ?, ?, ?)";
-        $params = [$vendorID, $otherName, $vendorPhone, $supplierStreetAddress, $supplierCitySTZIP];
+        $sql = "INSERT INTO dbo.Vendors (VendorName, Telephone, AddressLine1, CitySTZIP) VALUES (?, ?, ?, ?)";
+        $params = [$otherName, $vendorPhone, $supplierStreetAddress, $supplierCitySTZIP];
         $stmt = sqlsrv_query($conn, $sql, $params);
         if ($stmt === false) {
             error_log("Vendor insert failed: " . print_r(sqlsrv_errors(), true));
@@ -607,8 +602,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Insert Purchase Order with correct price
-    $sql = "INSERT INTO dbo.POs (PONum, Purchaser, Date, VendorID, Price, Status) VALUES (?, ?, ?, ?, ?, ?)";
-    $params = [$purchaseOrderNumber, $requestor, $orderDate, $vendorID, $final_total, "Ordered"];
+    $sql = "INSERT INTO dbo.POs (PONum, Purchaser, Date, VendorName, Price, Status) VALUES (?, ?, ?, ?, ?, ?)";
+    $params = [$purchaseOrderNumber, $requestor, $orderDate, $otherName, $final_total, "Ordered"];
     $stmt = sqlsrv_query($conn, $sql, $params);
     if ($stmt === false) {
         error_log("PO insert failed: " . print_r(sqlsrv_errors(), true));
@@ -635,9 +630,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Get vendor details for email
     $vendorDetails = null;
-    if ($vendorID) {
-        $sql = "SELECT vendorID, VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorID = ?";
-        $stmt = sqlsrv_query($conn, $sql, [$vendorID]);
+    if ($vendorName ?? $otherName) {
+        $sql = "SELECT VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorName = ?";
+        $stmt = sqlsrv_query($conn, $sql, [$otherName]);
         if ($stmt !== false) {
             $vendorDetails = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
         }

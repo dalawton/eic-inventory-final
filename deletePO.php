@@ -56,16 +56,15 @@ if ($conn === false) {
 // Get POST data
 $productNumber = $_POST['PO'];
 
+
+$logSql = "UPDATE dbo.POs SET Status = ? WHERE PONum = ?";
+$logParams = ['Cancelled', $productNumber];
+$stmt = sqlsrv_query($conn, $logSql, $logParams);
 // Execute the query
-$stmt = sqlsrv_query($conn, $sql, $params);
 if ($stmt === false) {
     die(print_r(sqlsrv_errors(), true));
 } else {
     echo "Record deleted successfully.";
-    // Log the action
-    $logSql = "INSERT INTO dbo.POs (Status) VALUE ? WHERE PONum = ?";
-    $logParams = ['DELETED', $productNumber];
-    sqlsrv_query($conn, $logSql, $logParams);
 }
 // Free the statement and close the connection
 sqlsrv_free_stmt($stmt);

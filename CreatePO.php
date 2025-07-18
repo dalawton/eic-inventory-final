@@ -81,7 +81,7 @@ if ($search !== '') {
     $params[] = "%$search%";
 }
 
-$sql = "SELECT VendorID, VendorName FROM Vendors $where ORDER BY VendorName";
+$sql = "SELECT VendorName FROM Vendors $where ORDER BY VendorName";
 $stmt = sqlsrv_query($conn, $sql, $params);
 if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
@@ -163,7 +163,7 @@ if ($contractStmt === false) {
                             <option value="">--Select Vendor--</option>
                             <option value="not_listed">Vendor not listed</option>
                             <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
-                            <option value="<?php echo htmlspecialchars($row['VendorID']) ?>">
+                            <option value="<?php echo htmlspecialchars($row['VendorName']) ?>">
                                 <?php echo htmlspecialchars($row['VendorName']) ?>
                             </option>
                             <?php endwhile; ?>
@@ -191,10 +191,6 @@ if ($contractStmt === false) {
                             <div class="form-group">
                                 <label for="otherName">Vendor Name:</label>
                                 <input type="text" id="otherName" name="otherName" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="otherVendorID">Vendor ID:</label>
-                                <input type="text" id="otherVendorID" name="otherVendorID" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label for="supplierStreetAddress">Street Address:</label>
@@ -225,7 +221,7 @@ if ($contractStmt === false) {
                                 <input type="email" id="contactEmail" name="contactEmail" class="form-control">
                             </div>
                         </div>
-                        <input type="hidden" id="vendorID" name="vendorID" value="">
+                        <input type="hidden" id="vendorName" name="vendorName" value="">
                     </div>
                 </div>
 
@@ -386,17 +382,16 @@ if ($contractStmt === false) {
                 otherFields.show();
                 vendorInfo.hide();
                 vendorDetails.html('');
-                $('#vendorID').val($('#otherVendorID').val());
+                $('#vendorName').val($('#otherVendorName').val());
             } else if (val) {
                 otherFields.hide();
-                $('#vendorID').val(val);
+                $('#vendorName').val(val);
                 // Fetch and show vendor info
-                $.get('getVendorInfo.php', { vendorID: val }, function(data) {
+                $.get('getVendorInfo.php', { vendorName: val }, function(data) {
                     var info = '';
                     try {
                         var vendor = (typeof data === 'string') ? JSON.parse(data) : data;
                         if (vendor && !vendor.error) {
-                            info += 'VendorID: ' + (vendor.vendorID ?? '') + '<br>';
                             info += 'Name: ' + (vendor.VendorName ?? '') + '<br>';
                             info += 'Phone: ' + (vendor.Telephone ?? '') + '<br>';
                             info += 'Address: ' + (vendor.AddressLine1 ?? '') + '<br>';
@@ -405,7 +400,7 @@ if ($contractStmt === false) {
                             info += 'Contact Email: ' + (vendor.ContactEmail ?? '') + '<br>';
                             vendorDetails.html(info);
                             vendorInfo.show();
-                            vendorID = vendor.vendorID;
+                            vendorName = vendor.vendorName;
                         } else {
                             vendorDetails.html('No details found.');
                             vendorInfo.show();
@@ -420,9 +415,9 @@ if ($contractStmt === false) {
                 vendorInfo.hide();
                 vendorDetails.html('');
             }
-                $('#otherVendorID').on('input', function() {
+                $('#otherVendorName').on('input', function() {
                     if ($('#vendorName').val() === 'not_listed') {
-                        $('#vendorID').val($(this).val());
+                        $('#vendorName').val($(this).val());
                 }
             });
         });

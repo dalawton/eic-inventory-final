@@ -48,14 +48,14 @@ if ($conn === false) {
     exit;
 }
 
-$vendorID = $_GET['vendorID'] ?? '';
-if (!$vendorID) {
+$vendorName = $_GET['vendorName'] ?? '';
+if (!$vendorName) {
     echo json_encode(['error' => 'No vendor ID']);
     exit;
 }
 
-$sql = "SELECT vendorID, VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorID = ?";
-$stmt = sqlsrv_query($conn, $sql, [$vendorID]);
+$sql = "SELECT VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorName = ?";
+$stmt = sqlsrv_query($conn, $sql, [$vendorName]);
 if ($stmt === false) {
     echo json_encode(['error' => 'Query failed']);
     exit;

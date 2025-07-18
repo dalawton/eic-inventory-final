@@ -150,7 +150,7 @@ if ($stmt === false) {
                     // Set the hidden field value
                     $('#hiddenSerialNumber').val(val);
                     
-                    // Fetch and show vendor info
+                    // Fetch and show repair info
                     $.get('getRepairInfo.php', { serialNumber: val }, function(data) {
                         var info = '';
                         try {

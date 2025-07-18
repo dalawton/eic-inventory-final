@@ -64,7 +64,7 @@ if (isset($_GET['searchPO']) && $_GET['searchPO'] !== '') {
     $params = ["%$search%"];
 } elseif (isset($_GET['searchVendor']) && $_GET['searchVendor'] !== '') {
     $search = $_GET['searchVendor'];
-    $where = "WHERE VendorID LIKE ?";
+    $where = "WHERE VendorName LIKE ?";
     $params = ["%$search%"];
 } elseif (isset($_GET['searchName']) && $_GET['searchName'] !== '') {
     $search = $_GET['searchName'];
@@ -149,7 +149,7 @@ if ($stmt === false) {
         <div class="form-content">
             <form class="form-control" method="get" action="">
                 <input type="search" style="width: 29%;" class="form-control" name="searchPO" placeholder="Search PO Number..." value="<?php echo htmlspecialchars($_GET['searchPO'] ?? '') ?>">
-                <input type="search" style="width: 29%;" class="form-control" name="searchVendor" placeholder="Search VendorID..." value="<?php echo htmlspecialchars($_GET['searchVendor'] ?? '') ?>">
+                <input type="search" style="width: 29%;" class="form-control" name="searchVendor" placeholder="Search Vendor Name..." value="<?php echo htmlspecialchars($_GET['searchVendor'] ?? '') ?>">
                 <input type="search" style="width: 29%;" class="form-control" name="searchName" placeholder="Search Purchaser..." value="<?php echo htmlspecialchars($_GET['searchName'] ?? '') ?>">
                 <button type="submit" class="btn btn-secondary">Search</button>
                 <?php if ($search) : ?>

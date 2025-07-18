@@ -56,7 +56,7 @@ if ($search !== '') {
     $params[] = "%$search%";
 }
 
-$sql = "SELECT VendorID, VendorName FROM Vendors $where ORDER BY VendorName";
+$sql = "SELECT VendorName FROM Vendors $where ORDER BY VendorName";
 $stmt = sqlsrv_query($conn, $sql, $params);
 if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
@@ -90,7 +90,7 @@ if ($stmt === false) {
                         <select name="vendorName" id="vendorName" class="form-control">
                             <option value="">--Select Vendor--</option>
                             <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
-                            <option value="<?php echo htmlspecialchars($row['VendorID']) ?>">
+                            <option value="<?php echo htmlspecialchars($row['VendorName']) ?>">
                                 <?php echo htmlspecialchars($row['VendorName']) ?>
                             </option>
                             <?php endwhile; ?>
@@ -111,8 +111,6 @@ if ($stmt === false) {
                                             var vendor = (typeof data === 'string') ? JSON.parse(data) : data;
                                             if (vendor && !vendor.error) {
                                                 // Set placeholders in the form fields
-                                                $('#vendorIDFix').attr('placeholder', vendor.vendorID ?? '');
-                                                $('#vendorNameFix').attr('placeholder', vendor.VendorName ?? '');
                                                 $('#contactNameFix').attr('placeholder', vendor.ContactName ?? '');
                                                 $('#contactEmailFix').attr('placeholder', vendor.ContactEmail ?? '');
                                                 $('#vendorPhoneFix').attr('placeholder', vendor.Telephone ?? '');
@@ -120,12 +118,12 @@ if ($stmt === false) {
                                                 $('#vendorCitySTZIPFix').attr('placeholder', vendor.CitySTZIP ?? '');
                                             } else {
                                                 // Clear placeholders if no vendor found
-                                                $('#vendorIDFix, #vendorNameFix, #contactNameFix, #contactEmailFix, #vendorPhoneFix, #vendorAddressFix, #vendorCitySTZIPFix').attr('placeholder', '');
+                                                $('#vendorNameFix, #contactNameFix, #contactEmailFix, #vendorPhoneFix, #vendorAddressFix, #vendorCitySTZIPFix').attr('placeholder', '');
                                             }
                                         });
                                     } else {
                                         // Clear placeholders if "not listed" or empty
-                                        $('#vendorIDFix, #vendorNameFix, #contactNameFix, #contactEmailFix, #vendorPhoneFix, #vendorAddressFix, #vendorCitySTZIPFix').attr('placeholder', '');
+                                        $('#vendorNameFix, #contactNameFix, #contactEmailFix, #vendorPhoneFix, #vendorAddressFix, #vendorCitySTZIPFix').attr('placeholder', '');
                                     }
                                 });
                             });
@@ -133,11 +131,8 @@ if ($stmt === false) {
                     </div>
                     <div class="form-group">
                         <form id="editVendor" method="POST" action="editVendor.php">
-                            <input type="hidden" id="vendorID" name="vendorID" value="">
+                            <input type="hidden" id="vendorName" name="vendorName" value="">
                             <br>
-                            <label for="vendorIDFix">New Vendor ID: </label>
-                            <input type="text" id="vendorIDFix" style="width:50%;" class="form-control" name="vendorIDFix">
-                            <br><br>
 
                             <label for="vendorNameFix">New Vendor Name: </label>
                             <input type="text" id="vendorNameFix" style="width:50%;" class="form-control" name="vendorNameFix">

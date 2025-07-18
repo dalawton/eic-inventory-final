@@ -55,7 +55,7 @@ if ($conn === false) {
 }
 
 // Get all non-received POs
-$sql = "SELECT PONum FROM POs WHERE Status != 'Received'";
+$sql = "SELECT PONum FROM POs WHERE Status = 'Ordered'";
 $stmt = sqlsrv_query($conn, $sql);
 $poOptions = [];
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
@@ -83,6 +83,32 @@ if ($selectedPO) {
     <link rel="stylesheet" href="stylePurchaseOrder.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        .product-table th:nth-child(1),
+        .product-table td:nth-child(1) {
+            max-width: 100px;
+            width: 100px;
+        }
+        
+        .product-table th:nth-child(2),
+        .product-table td:nth-child(2) {
+            max-width: 100px;
+            width: 100px;
+
+        }
+        
+        .product-table th:nth-child(3),
+        .product-table td:nth-child(3) {
+            max-width: 90px;
+            width: 90px;
+        }
+
+        .product-table th:nth-child(4),
+        .product-table td:nth-child(4) {
+            max-width: 200px;
+            width: 200px;
+        }
+    </style>
     
 </head>
 <body>
@@ -115,11 +141,12 @@ if ($selectedPO) {
                     <div class="table-header">
                         <h2>Items Ordered for PO <?php echo htmlspecialchars($selectedPO) ?></h2>
                     </div>
-                    <div class="action-buttons">
-                            <button type="submit" id="receivedButton" onclick="locaton.href='deletePO.php'" class="btn btn-secondary">
-                                Delete PO
-                            </button>
-                        </div>
+                    <form class="action-buttons" method="post" action="deletePO.php">
+                        <button type="submit" id="receivedButton" onclick="locaton.href='deletePO.php'" class="btn btn-secondary">
+                            Delete PO
+                        </button>
+                        <input type="hidden" name="PO" value="<?php echo htmlspecialchars($selectedPO) ?>">
+                    </form>
                     <div class="desc-info">
                         <p> If the full quantity of parts are received, click checkbox for each fully quantity of part</p>
                         <p> If not all items are received, change 'Amount Received' to the amount in the shipment and submit. Once the rest of the parts arrive, resubmit for those items</p>
