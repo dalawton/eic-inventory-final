@@ -72,7 +72,7 @@ if (isset($_GET['searchPO']) && $_GET['searchPO'] !== '') {
     $params = ["%$search%"];
 }
 // Searches through POs using the search critera
-$sql = "SELECT * FROM POs $where";
+$sql = "SELECT * FROM POs $where ORDER BY PONum DESC";
 $stmt = sqlsrv_query($conn, $sql, $params);
 
 // if fails, throws an error
