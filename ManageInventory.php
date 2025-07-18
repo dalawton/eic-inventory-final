@@ -156,7 +156,7 @@ if ($stmt === false) {
                     <?php endif; ?>
                 </form>
                 <div class="product-table-container">
-                    <table  class="product-table" border="1">
+                    <table class="product-table" border="1">
                         <div class="table-header">
                             <tr>
                                 <th>Part Number</th>
