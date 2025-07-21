@@ -142,8 +142,8 @@ if ($contractStmt === false) {
                         </div>
                         
                         <div class="form-group">
-                            <label for="fdate">Date:</label>
-                            <input type="date" id="fdate" name="date" class="form-control" required>
+                            <label for="date">Date:</label>
+                            <input type="date" id="date" name="date" class="form-control" required>
                         </div>
                         
                         <div class="form-group">
@@ -221,7 +221,6 @@ if ($contractStmt === false) {
                                 <input type="email" id="contactEmail" name="contactEmail" class="form-control">
                             </div>
                         </div>
-                        <input type="hidden" id="vendorName" name="vendorName" value="">
                     </div>
                 </div>
 
@@ -382,11 +381,9 @@ if ($contractStmt === false) {
                 otherFields.show();
                 vendorInfo.hide();
                 vendorDetails.html('');
-                $('#vendorName').val($('#otherVendorName').val());
             } else if (val) {
                 otherFields.hide();
-                $('#vendorName').val(val);
-                // Fetch and show vendor info
+                // Fetch and show vendor info using VendorName
                 $.get('getVendorInfo.php', { vendorName: val }, function(data) {
                     var info = '';
                     try {
@@ -400,7 +397,6 @@ if ($contractStmt === false) {
                             info += 'Contact Email: ' + (vendor.ContactEmail ?? '') + '<br>';
                             vendorDetails.html(info);
                             vendorInfo.show();
-                            vendorName = vendor.vendorName;
                         } else {
                             vendorDetails.html('No details found.');
                             vendorInfo.show();
@@ -415,11 +411,6 @@ if ($contractStmt === false) {
                 vendorInfo.hide();
                 vendorDetails.html('');
             }
-                $('#otherVendorName').on('input', function() {
-                    if ($('#vendorName').val() === 'not_listed') {
-                        $('#vendorName').val($(this).val());
-                }
-            });
         });
 
         // On page load, ensure correct fields are shown/hidden

@@ -78,11 +78,10 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         $mail->Host = 'smtp.office365.com';
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['SMTP_EMAIL'];
-        $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
+        $mail->Password = $_ENV['SMTP_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-
-        // Prevent hanging
+        
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
             'ssl' => array(
@@ -107,13 +106,12 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         // Generate email body
         $emailBody = generatePurchaseOrderEmailBody($formData, $products, $vendorDetails);
         $mail->Body = $emailBody;
-
-        // Plain text version
-        $mail->AltBody = generatePlainTextVersion($formData, $products);
+        $mail->AltBody = generatePlainTextVersion($formData, $products, $vendorDetails);
 
         // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Purchase order email sent successfully'];
+        
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Email could not be sent. Error: ' . $mail->ErrorInfo];
     }
@@ -130,17 +128,33 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
  */
 function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [])
 {
-    // Use DB values if found, otherwise fallback to form data
-    $vendorName = $vendorDetails['VendorName'] ?? $formData['otherName'] ?? $formData['VendorName'] ?? 'N/A';
-    $telephone = $vendorDetails['Telephone'] ?? $formData['vendorPhone'] ?? 'N/A';
-    $contactName = $vendorDetails['ContactName'] ?? $formData['contactName'] ?? 'N/A';
-    $contactEmail = $vendorDetails['ContactEmail'] ?? $formData['contactEmail'] ?? 'N/A';
-    $addressLine1 = $vendorDetails['AddressLine1'] ?? $formData['streetAddress'] ?? 'N/A';
-    $citySTZIP = $vendorDetails['CitySTZIP'] ?? (
-        ($formData['supplierCity'] ?? '') . ', ' .
-        ($formData['supplierState'] ?? '') . ' ' .
-        ($formData['supplierZip'] ?? '')
-    ) ?: 'N/A';
+    // Debug logging
+    error_log("Form data: " . print_r($formData, true));
+    error_log("Vendor details: " . print_r($vendorDetails, true));
+    
+    // Determine if this is a new vendor or existing vendor
+    $isNewVendor = ($formData['vendorName'] === 'not_listed');
+    
+    if ($isNewVendor) {
+        // Use form data for new vendors
+        $vendorName = $formData['otherName'] ?? 'N/A';
+        $telephone = $formData['vendorPhone'] ?? 'N/A';
+        $contactName = $formData['contactName'] ?? 'N/A';
+        $contactEmail = $formData['contactEmail'] ?? 'N/A';
+        $addressLine1 = $formData['streetAddress'] ?? 'N/A';
+        $citySTZIP = trim(($formData['supplierCity'] ?? '') . ', ' . 
+                         ($formData['supplierState'] ?? '') . ' ' . 
+                         ($formData['supplierZip'] ?? ''));
+        if ($citySTZIP === ', ') $citySTZIP = 'N/A';
+    } else {
+        // Use database vendor details for existing vendors, with form fallbacks
+        $vendorName = $vendorDetails['VendorName'] ?? $formData['vendorName'] ?? 'N/A';
+        $telephone = $vendorDetails['Telephone'] ?? 'N/A';
+        $contactName = $vendorDetails['ContactName'] ?? 'N/A';
+        $contactEmail = $vendorDetails['ContactEmail'] ?? 'N/A';
+        $addressLine1 = $vendorDetails['AddressLine1'] ?? 'N/A';
+        $citySTZIP = $vendorDetails['CitySTZIP'] ?? 'N/A';
+    }
 
     $html = '
     <!DOCTYPE html>
@@ -350,7 +364,7 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
         </div>
     </div>';
 
-    // Products Section with proper price formatting
+    // Products Section
     if (!empty($products)) {
         $html .= '
         <div class="section">
@@ -369,12 +383,10 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
 
         $grandTotal = 0;
         foreach ($products as $product) {
-            // Ensure proper numeric parsing
             $unitPrice = floatval($product['unitPrice'] ?? 0);
             $quantity = intval($product['quantity'] ?? 0);
             $total = floatval($product['total'] ?? 0);
-
-            // If total is 0, calculate it
+            
             if ($total == 0) {
                 $total = $unitPrice * $quantity;
             }
@@ -427,6 +439,15 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
  */
 function generatePlainTextVersion($formData, $products)
 {
+    // Similar logic as HTML version for vendor details
+    $isNewVendor = ($formData['vendorName'] === 'not_listed');
+    
+    if ($isNewVendor) {
+        $vendorName = $formData['otherName'] ?? 'N/A';
+    } else {
+        $vendorName = $vendorDetails['VendorName'] ?? $formData['vendorName'] ?? 'N/A';
+    }
+    
     $text = "PURCHASE ORDER REQUISITION FORM\n";
     $text .= "================================\n\n";
 
@@ -448,22 +469,34 @@ function generatePlainTextVersion($formData, $products)
 
     // Vendor Information
     $text .= "VENDOR INFORMATION:\n";
-    $text .= "Vendor Name: " . ($formData['vendorName'] ?? $formData['otherName'] ?? 'N/A') . "\n";
-
-    if (!empty($formData['streetAddress'])) {
-        $text .= "Address: " . $formData['streetAddress'] . "\n";
-    }
-    if (!empty($formData['supplierCity'])) {
-        $text .= "City: " . $formData['supplierCity'] . "\n";
-    }
-    if (!empty($formData['supplierState'])) {
-        $text .= "State: " . $formData['supplierState'] . "\n";
-    }
-    if (!empty($formData['supplierZip'])) {
-        $text .= "Zip: " . $formData['supplierZip'] . "\n";
-    }
-    if (!empty($formData['vendorPhone'])) {
-        $text .= "Phone: " . $formData['vendorPhone'] . "\n";
+    $text .= "Vendor Name: " . $vendorName . "\n";
+    
+    if ($isNewVendor) {
+        if (!empty($formData['streetAddress'])) {
+            $text .= "Address: " . $formData['streetAddress'] . "\n";
+        }
+        if (!empty($formData['supplierCity'])) {
+            $text .= "City: " . $formData['supplierCity'] . "\n";
+        }
+        if (!empty($formData['supplierState'])) {
+            $text .= "State: " . $formData['supplierState'] . "\n";
+        }
+        if (!empty($formData['supplierZip'])) {
+            $text .= "Zip: " . $formData['supplierZip'] . "\n";
+        }
+        if (!empty($formData['vendorPhone'])) {
+            $text .= "Phone: " . $formData['vendorPhone'] . "\n";
+        }
+    } else {
+        if (!empty($vendorDetails['AddressLine1'])) {
+            $text .= "Address: " . $vendorDetails['AddressLine1'] . "\n";
+        }
+        if (!empty($vendorDetails['CitySTZIP'])) {
+            $text .= "City, State ZIP: " . $vendorDetails['CitySTZIP'] . "\n";
+        }
+        if (!empty($vendorDetails['Telephone'])) {
+            $text .= "Phone: " . $vendorDetails['Telephone'] . "\n";
+        }
     }
     $text .= "\n";
 
@@ -477,7 +510,7 @@ function generatePlainTextVersion($formData, $products)
     $text .= "\n";
     $text .= "Delivery Address: 111 Downey Street, Norwood, MA 02062\n\n";
 
-    // Products with proper price formatting
+    // Products
     if (!empty($products)) {
         $text .= "REQUESTED PRODUCTS:\n";
         $text .= str_repeat("-", 80) . "\n";
@@ -525,9 +558,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
     $products = json_decode($formData['productsJSON'], true);
 
-    // Debug: Log received data
     error_log("Received products JSON: " . $formData['productsJSON']);
-
+    error_log("Form data received: " . print_r($formData, true));
+    
     $final_total = 0.00;
     $processedProducts = [];
 
@@ -535,24 +568,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $productNumber = $product['productNumber'] ?? '';
         $description = $product['description'] ?? '';
         $quantity = isset($product['quantity']) ? intval($product['quantity']) : 0;
-
-        // Better price parsing - handle both string and numeric values
+        
         $unitPrice = 0.00;
         if (isset($product['unitPrice'])) {
             if (is_string($product['unitPrice'])) {
-                // Remove $ and other characters, then parse
                 $unitPrice = floatval(preg_replace('/[^0-9.]/', '', $product['unitPrice']));
             } else {
                 $unitPrice = floatval($product['unitPrice']);
             }
         }
-
-        // Calculate total (don't rely on frontend calculation)
+        
         $lineTotal = round($quantity * $unitPrice, 2);
         $final_total += $lineTotal;
-
-        // Debug: Log individual product processing
-        error_log("Processing product: {$productNumber}, Qty: {$quantity}, Unit: {$unitPrice}, Total: {$lineTotal}");
 
         $processedProducts[] = [
             'productNumber' => $productNumber,
@@ -562,9 +589,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'total' => $lineTotal
         ];
     }
-
-    // Debug: Log final total
-    error_log("Final total calculated: " . $final_total);
 
     $purchaseOrderNumber = $formData['purchaseOrderNumber'];
     $vendorName = $formData['vendorName'];
@@ -628,14 +652,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Get vendor details for email
     $vendorDetails = null;
-    if ($vendorName ?? $otherName) {
-        $sql = "SELECT VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorName = ?";
-        $stmt = sqlsrv_query($conn, $sql, [$otherName]);
-        if ($stmt !== false) {
-            $vendorDetails = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    if ($vendorName && $vendorName !== 'not_listed') {
+        error_log("Looking up vendor details for vendorName: " . $vendorName);
+        $sql1 = "SELECT VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorName = ?";
+        $stmt1 = sqlsrv_query($conn, $sql1, [$vendorName]);
+        if ($stmt1 !== false) {
+            $vendorDetails = sqlsrv_fetch_array($stmt1, SQLSRV_FETCH_ASSOC);
+            error_log("Vendor details found: " . print_r($vendorDetails, true));
+        } else {
+            error_log("Vendor query failed: " . print_r(sqlsrv_errors(), true));
         }
+    } else {
+        error_log("No vendorName provided for lookup or vendor is new");
     }
 
     // Send email
@@ -647,3 +676,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Purchase order submitted but email failed: " . $result['message'];
     }
 }
+?>
