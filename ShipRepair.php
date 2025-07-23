@@ -184,22 +184,3 @@ if ($stmt === false) {
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="styleRepair.css">
-    </head>
-    <body>
-        <div class="main-container">
-            <div class="navigation">
-                    <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
-                        Go Back
-                    </button>
-                    <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
-                        Report an Issue
-                    </button>
-            </div>
-        </div>
-    </body>
-</html>

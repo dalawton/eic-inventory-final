@@ -297,6 +297,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Creates the sql statement, establishes the connection, declares the statement and adds the values wishing to be inserted
     $stmt = sqlsrv_query($conn, $sql, $params);
 
+    // UPDATE TO ADD CASE IF REPAIR IS NOT IN TABLE!!!!!!!!
+    $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'NEEDS REPAIR' WHERE SN = $serialNumber";
+    sqlsrv_query($conn, $sqlAll);
     // throws an error if $stmt does not execute correctly and prints the error
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));

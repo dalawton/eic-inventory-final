@@ -142,9 +142,18 @@ if ($selectedPO) {
                         <h2>Items Ordered for PO <?php echo htmlspecialchars($selectedPO) ?></h2>
                     </div>
                     <form class="action-buttons" method="post" action="deletePO.php">
-                        <button type="submit" id="receivedButton" onclick="locaton.href='deletePO.php'" class="btn btn-secondary">
+                        <button type="button" onclick="showConfirm()" id="deleteButton" class="btn btn-secondary">
                             Delete PO
                         </button>
+                        <br>
+                        <div class="form-control" style="display: none;" id="confirm">
+                            <p><b>CONFIRMING: TYPE 'Delete' to delete selected PO</b></p><br>
+                            <input type="text" class="form-control" id="passInput">
+                            <button class="btn" onclick="checkPass()">Confirm Deletion</button>
+                        </div>
+                        <div class="form-content" style="display:none;" id="button">
+                            <button type="submit" id="deletePO" class="btn btn-submit">DELETE</button>
+                        </div>
                         <input type="hidden" name="PO" value="<?php echo htmlspecialchars($selectedPO) ?>">
                     </form>
                     <div class="desc-info">
@@ -198,3 +207,18 @@ if ($selectedPO) {
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>
+
+<script>
+    function checkPass() {
+        const correctPass = "Delete";
+        const userInput = document.getElementById("passInput").value;
+
+        if (userInput === correctPass) {
+            document.getElementById("button").style.display="block";
+        }
+    }
+
+    function showConfirm() {
+        document.getElementById("confirm").style.display="block";
+    }
+</script>

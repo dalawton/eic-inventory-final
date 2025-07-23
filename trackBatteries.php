@@ -3,7 +3,7 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
- * File to display all POs and their respective information and status
+ * Display all Batteries and their statuses
  *
  * PHP version 8
  *
@@ -13,7 +13,7 @@
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
  *
- * @category  Get_Files
+ * @category  Get_File
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
  * @copyright 1999 - 2019 The PHP Group
@@ -26,7 +26,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
+// Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -36,7 +36,6 @@ $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -45,37 +44,37 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Search logic for search button
 $search = '';
 $where = '';
 $params = [];
 
-if (isset($_GET['searchPO']) && $_GET['searchPO'] !== '') {
-    $search = $_GET['searchPO'];
-    $where = "WHERE PONum LIKE ?";
-    $params = ["%$search%"];
-} elseif (isset($_GET['searchVendor']) && $_GET['searchVendor'] !== '') {
-    $search = $_GET['searchVendor'];
-    $where = "WHERE VendorName LIKE ?";
-    $params = ["%$search%"];
-} elseif (isset($_GET['searchName']) && $_GET['searchName'] !== '') {
-    $search = $_GET['searchName'];
-    $where = "WHERE Purchaser LIKE ?";
+if (isset($_GET['searchSN']) && $_GET['searchSN'] !== '') {
+    $search = $_GET['searchSN'];
+    $where = "WHERE SN LIKE ?";
     $params = ["%$search%"];
 }
-// Searches through POs using the search critera
-$sql = "SELECT * FROM POs $where ORDER BY PONum DESC";
+
+elseif (isset($_GET['searchBT']) && $_GET['searchBT'] !== '') {
+    $search = $_GET['searchBT'];
+    $where = "WHERE BatteryType LIKE ?";
+    $params = ["%$search%"];
+}
+
+elseif (isset($_GET['searchStatus']) && $_GET['searchStatus'] !== '') {
+    $search = $_GET['searchStatus'];
+    $where = "WHERE Status LIKE ?";
+    $params = ["%$search%"];
+}
+
+$sql = "SELECT SN, BatteryType, Status FROM dbo.All_Batteries $where ORDER BY SN DESC";
 $stmt = sqlsrv_query($conn, $sql, $params);
 
-// if fails, throws an error
 if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -85,7 +84,7 @@ if ($stmt === false) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>All Purchase Orders</title>
+    <title>All Batteries</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="stylePurchaseOrder.css">
     <style>
@@ -133,32 +132,26 @@ if ($stmt === false) {
             color: #fff;
             font-size: 0.95em;
         }
-        
-        .product-table tr.reverted {
-            background: #ffeaea;
-            color: #a33;
-        }
 
-        .product-table td span.status-ordered { background: #2196f3; }
-        .product-table td span.status-received { background: #4caf50; }
-        .product-table td span.status-cancelled { background: #f44336; }
+        .product-table td span.status-shipped_out { background: #4caf50; }
+        .product-table td span.status-needs_repair { background: #f44336; }
+        .product-table td span.status-in_house { background: #f8a232ff; }
         .product-table td span.status-other { background: #888; }
     </style>
 </head>
 <body>
     <div class="main-container">
         <div class="header">
-            <h1>All Purchase Orders</h1>
+            <h1>All Batteries</h1>
         </div>
-        <!-- Search Form -->
         <div class="form-content">
-            <form class="form-control" method="get" action="">
-                <input type="search" style="width: 29%;" class="form-control" name="searchPO" placeholder="Search PO Number..." value="<?php echo htmlspecialchars($_GET['searchPO'] ?? '') ?>">
-                <input type="search" style="width: 29%;" class="form-control" name="searchVendor" placeholder="Search Vendor Name..." value="<?php echo htmlspecialchars($_GET['searchVendor'] ?? '') ?>">
-                <input type="search" style="width: 29%;" class="form-control" name="searchName" placeholder="Search Purchaser..." value="<?php echo htmlspecialchars($_GET['searchName'] ?? '') ?>">
+            <form class="form-control" style="padding-left: 130px;" method="get" action="">
+                <input type="search" class="form-control" name="searchSN" placeholder="Search by Serial Number" value="<?php echo htmlspecialchars($_GET['searchSN'] ?? '') ?>">
+                <input type="search" class="form-control" name="searchBT" placeholder="Search by Battery Type" value="<?php echo htmlspecialchars($_GET['searchBT'] ?? '') ?>">
+                <input type="search" class="form-control" name="searchStatus" placeholder="Search by Status" value="<?php echo htmlspecialchars($_GET['searchStatus'] ?? '') ?>">
                 <button type="submit" class="btn btn-secondary">Search</button>
                 <?php if ($search) : ?>
-                    <a href="TrackPO.php">Clear</a>
+                    <a href="trackBatteries.php">Clear</a>
                 <?php endif; ?>
             </form>
             <div class="product-table-container">
@@ -166,36 +159,28 @@ if ($stmt === false) {
                     <tr>
                         <?php
                         echo "<div class='table-header'>";
-                        // Fetch the first row to get column names
                         $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
                         if ($row) {
                             foreach (array_keys($row) as $colName) {
-                                echo "<th>" . htmlspecialchars($colName) . "</th>";
+                                    echo "<th>" . htmlspecialchars($colName) . "</th>";
                             }
                             echo "</div>";
                             echo "</tr>";
-
-                            // Output the first row
+                            echo "<tr class='text'>";
                             foreach ($row as $colName => $value) {
-                                $statusType = strtolower($row['Status']);
-                                $isCancelled = ($row['Status'] === "Cancelled");
-                                echo "<tr" . ($isCancelled ? " class='reverted'" : "text") . ">";
+                                $statusType = $row['Status'];
                                 $statusClass = "status-other";
-                                if ($statusType === "ordered") {
-                                    $statusClass = "status-ordered";
-                                } elseif ($statusType === "received") {
-                                    $statusClass = "status-received";
-                                } elseif ($statusType === "cancelled") {
-                                    $statusClass = "status-cancelled";
+                                if ($statusType === "SHIPPED") {
+                                    $statusClass = "status-shipped_out";
+                                } elseif ($statusType === "NEEDS REPAIR") {
+                                    $statusClass = "status-needs_repair";
+                                } elseif ($statusType === "IN-HOUSE") {
+                                    $statusClass = "status-in_house";
                                 } else {
                                     $statusClass = "status-other";
                                 }
 
-                                if ($value instanceof DateTime) {
-                                    echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
-                                } elseif (strtolower($colName) === 'price') {
-                                    echo "<td>$" . number_format((float)$value, 2) . "</td>";
-                                } elseif (strtolower($colName) === 'status') {
+                                if (strtolower($colName) === 'status') {
                                     echo "<td><span class='status-label $statusClass'>" . htmlspecialchars(ucfirst($row['Status'])) . "</span></td>";
                                 } else {
                                     echo "<td>" . htmlspecialchars((string)$value) . "</td>";
@@ -203,43 +188,36 @@ if ($stmt === false) {
                             }
                             echo "</tr>";
 
-                            // Output the rest
                             while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                                $isCancelled = ($row['Status'] === "Cancelled");
-                                echo "<tr" . ($isCancelled ? " class='reverted'" : "text") . ">";
+                                echo "<tr class='text'>";
                                 foreach ($row as $colName => $value) {
-                                    $statusType = strtolower($row['Status']);
+                                    $statusType = $row['Status'];
                                     $statusClass = "status-other";
-                                    if ($statusType === "ordered") {
-                                        $statusClass = "status-ordered";
-                                    } elseif ($statusType === "received") {
-                                        $statusClass = "status-received";
-                                    } elseif ($statusType === "cancelled") {
-                                        $statusClass = "status-cancelled";
+                                    if ($statusType === "SHIPPED") {
+                                        $statusClass = "status-shipped_out";
+                                    } elseif ($statusType === "NEEDS REPAIR") {
+                                        $statusClass = "status-needs_repair";
+                                    } elseif ($statusType === "IN-HOUSE") {
+                                        $statusClass = "status-in_house";
                                     } else {
                                         $statusClass = "status-other";
                                     }
-                                    
-                                    if ($value instanceof DateTime) {
-                                        echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
-                                    } elseif (strtolower($colName) === 'price') {
-                                        echo "<td>$" . number_format((float)$value, 2) . "</td>";
-                                    } elseif (strtolower($colName) === 'status') {
+
+                                    if (strtolower($colName) === 'status') {
                                         echo "<td><span class='status-label $statusClass'>" . htmlspecialchars(ucfirst($row['Status'])) . "</span></td>";
                                     } else {
                                         echo "<td>" . htmlspecialchars((string)$value) . "</td>";
                                     }
                                 }
-                                echo "</tr>";
+                            echo "</tr>";
                             }
                         } else {
-                            echo "<td colspan='100%'>No purchase orders found.</td></tr>";
+                            echo "<td colspan='100%'>No batteries found.</td></tr>";
                         }
                         ?>
                 </table>
             </div>
         </div>
-        <!-- Navigation -->
         <div class="navigation">
             <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                 Return to Front Page
@@ -256,3 +234,4 @@ if ($stmt === false) {
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>
+

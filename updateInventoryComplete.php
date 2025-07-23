@@ -58,6 +58,12 @@ $selectedBattery = $_POST['selectedBattery'] ?? null;
 $amountUsed = $_POST['amount_Used'] ?? [];
 $serialNumber = $_POST['serialNumber'] ?? null;
 
+// Add Serial Number into Battery Database
+if ($serialNumber) {
+    $sqlBattery = "INSERT INTO dbo.All_Batteries (SN, BatteryType, Status) VALUES (?,?,?)";
+    $stmtBattery = sqlsrv_query($conn, $sqlBattery, [$serialNumber, $selectedBattery, "IN-HOUSE"]);
+}
+
 // Get all parts for this battery
 $sql = "SELECT * FROM dbo.PartsForBatteries WHERE Name = ?";
 $stmt = sqlsrv_query($conn, $sql, [$selectedBattery]);

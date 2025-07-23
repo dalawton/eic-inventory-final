@@ -280,6 +280,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $updateDetails = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingDetails = '$repairNotes' WHERE SerialNumber = ?", [$serialNum]);
     $updateLocation = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingLocation = '$shippingLocation' WHERE SerialNumber = ?", [$serialNum]);
 
+    // Mark in All_Batteries table
+    $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'SHIPPED' WHERE SN = $serialNum";
+    sqlsrv_query($conn, $sqlAll);
+
     // After updating Repairs table
     $logSql = "INSERT INTO dbo.InventoryLog 
         (ActionType, TableAffected, RepairSerialNumber, RepairRequester, RepairDetails, RepairStatus) 

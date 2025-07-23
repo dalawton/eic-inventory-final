@@ -150,6 +150,11 @@ if ($contractStmt === false) {
                             <label for="requestorName">Requestor:</label>
                             <input type="text" id="requestorName" name="requestorName" class="form-control" required>
                         </div>
+
+                        <div class="form-group">
+                            <label for="requestorEmail">Requestor's Email:</label>
+                            <input type="text" id="requestorEmail" name="requestorEmail" class="form-control">
+                        </div>
                     </div>
                 </div>
 
@@ -346,6 +351,11 @@ if ($contractStmt === false) {
                 </div>
             </div>
 
+            <form id="comments" method="POST" class="action-buttons" style="display:block; text-align:center;">
+                <p><strong>Add any comments here:</strong></p><br>
+                <input type="text" id="comment" name="comment" class="form-control">
+            </form>
+
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button type="button" id="submitAllButton" class="btn btn-success">
@@ -480,9 +490,11 @@ if ($contractStmt === false) {
             // Collect form data from both forms
             const supplierForm = document.getElementById('supplierInfo');
             const tableRows = document.querySelectorAll("#productTableSubmitted tbody tr");
-
+            
             const combinedData = new FormData(supplierForm);
-
+            const commentsForm = document.getElementById('comments');
+            const commentsInput = commentsForm.querySelector('input[type="text"]'); // or whatever selector matches your input
+            combinedData.append('comments', commentsInput.value);
             // Collect all rows from the table with proper price parsing
             const products = [];
             tableRows.forEach(row => {
@@ -520,8 +532,7 @@ if ($contractStmt === false) {
             .then(response => response.text())
             .then(data => {
                 console.log('Server response:', data);
-                alert(data); // Show success or error message
-                // Optionally, redirect or reset forms here
+                alert(data);
             })
             .catch(error => {
                 console.error('Error:', error);

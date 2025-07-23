@@ -97,6 +97,10 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         $mail->addCC($_ENV['PATSY_EMAIL'], 'Patricia Riley');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
+
+        if (!empty($formData['requestorEmail'])) {
+            $mail->addCC($formData['requestorEmail'], $formData['requestorName']);
+        }
         // $mail->addCC('', '');
 
         // Content
@@ -256,7 +260,7 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
             <h1>Purchase Order Requisition Form</h1>
             <p><strong>PO Number:</strong> ' . htmlspecialchars($formData['purchaseOrderNumber'] ?? 'N/A') . '</p>
             <p><strong>Date:</strong> ' . htmlspecialchars($formData['date'] ?? 'N/A') . '</p>
-            <p><strong>Submitted:</strong> ' . date('Y-m-d H:i:s') . '</p>
+            <p><strong>Submitted:</strong> ' . date('Y-m-d') . '</p>
         </div>';
 
     // Special Requests Section
@@ -414,6 +418,10 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
     }
 
     $html .= '
+        <div class="section">
+            <span class="info-comments">Comments from Requestor:</span><br>
+            ' . htmlspecialchars($formData['comment'] ?? '') . '
+        </div>
         <div style="background: white; padding: 15px; border: 2px dashed #007bff; margin-top: 20px;">
             <p><strong>Your Signature:</strong></p>
             <br>
@@ -625,15 +633,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Insert Purchase Order with correct price
-    $sql = "INSERT INTO dbo.POs (PONum, Purchaser, Date, VendorName, Price, Status) VALUES (?, ?, ?, ?, ?, ?)";
-    $params = [$purchaseOrderNumber, $requestor, $orderDate, $otherName, $final_total, "Ordered"];
-    $stmt = sqlsrv_query($conn, $sql, $params);
-    if ($stmt === false) {
-        error_log("PO insert failed: " . print_r(sqlsrv_errors(), true));
-        die("Error inserting PO: " . print_r(sqlsrv_errors(), true));
-    }
-
     // Insert POItems with correct prices
     foreach ($processedProducts as $product) {
         $sql = "INSERT INTO dbo.POItems (PONum, PN, Quantity, UnitPrice, Description, Total) VALUES (?, ?, ?, ?, ?, ?)";
@@ -665,6 +664,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         error_log("No vendorName provided for lookup or vendor is new");
+    }
+
+    // Insert Purchase Order with correct price
+    $sql = "INSERT INTO dbo.POs (PONum, Purchaser, Date, VendorName, Price, Status) VALUES (?, ?, ?, ?, ?, ?)";
+    $params = [$purchaseOrderNumber, $requestor, $orderDate, $otherName, $final_total, "Ordered"];
+    $stmt = sqlsrv_query($conn, $sql, $params);
+    if ($stmt === false) {
+        error_log("PO insert failed: " . print_r(sqlsrv_errors(), true));
+        die("Error inserting PO: " . print_r(sqlsrv_errors(), true));
     }
 
     // Send email
