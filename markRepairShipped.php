@@ -93,11 +93,8 @@ function sendRepairEmail($formData)
         // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
-
-        // Add CC if specified
-        if (!empty($_ENV['CC_EMAIL'])) {
-            $mail->addCC($_ENV['CC_EMAIL']);
-        }
+        $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
+        $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
 
         // Content
         $mail->isHTML(true);
@@ -112,7 +109,7 @@ function sendRepairEmail($formData)
 
         // Send the email
         $mail->send();
-        return ['success' => true, 'message' => 'Purchase order email sent successfully'];
+        return ['success' => true, 'message' => 'Email sent successfully'];
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Email could not be sent. Error: ' . $mail->ErrorInfo];
     }
@@ -275,10 +272,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $repairNotes = $formData['details'] ?? '';
     $shippingLocation = $formData['shippingLocation'];
     // Marks Repair as Shipped/Completed
-    $updateRepair = sqlsrv_query($conn, "UPDATE dbo.Repairs SET Status = 'Completed' WHERE SerialNumber = ?", [$serialNum]);
+    $updateRepair = sqlsrv_query($conn, "UPDATE dbo.Repairs SET Status = 'SHIPPED' WHERE SerialNumber = ?", [$serialNum]);
     $updateDate = sqlsrv_query($conn, "UPDATE dbo.Repairs SET DateShipped = '$shippingDate' WHERE SerialNumber = ?", [$serialNum]);
     $updateDetails = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingDetails = '$repairNotes' WHERE SerialNumber = ?", [$serialNum]);
     $updateLocation = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingLocation = '$shippingLocation' WHERE SerialNumber = ?", [$serialNum]);
+
+    $extraPartNumbers = $formData['partNumber'] ?? [];
+    $extraAmounts = $formData['amountUsed'] ?? [];
+    for ($i = 0; $i < count($extraPartNumbers); $i++) {
+        $pn = $extraPartNumbers[$i] ?? '';
+        $amt = (int)($extraAmounts[$i] ?? 0);
+        
+        if (!empty($pn) && $amt > 0) {
+            // Update inventory for extra parts
+            $invCheck = sqlsrv_query($conn, "SELECT Amount from dbo.Inventory WHERE PN = ?", [$pn]);
+            if ($row = sqlsrv_fetch_array($invCheck, SQLSRV_FETCH_ASSOC)) {
+                $newQty = $row['Amount'] - $amt;
+                $updateStmt = sqlsrv_query($conn, "UPDATE dbo.Inventory SET Amount = ? WHERE PN = ?", [$newQty, $pn]);
+                
+                if ($updateStmt === false) {
+                    throw new Exception("Failed to update inventory for extra part $pn: " . print_r(sqlsrv_errors(), true));
+                }
+            } else {
+                // If part doesn't exist in inventory, create it
+                $insertStmt = sqlsrv_query($conn, "INSERT INTO dbo.Inventory (PN, Amount) VALUES (?, ?, ?)", [$pn, -$amt]);
+                
+                if ($insertStmt === false) {
+                    throw new Exception("Failed to insert inventory for extra part $pn: " . print_r(sqlsrv_errors(), true));
+                }
+            }
+        }
+    }
 
     // Mark in All_Batteries table
     $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'SHIPPED' WHERE SN = $serialNum";

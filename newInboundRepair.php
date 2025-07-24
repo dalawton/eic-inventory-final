@@ -3,7 +3,7 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
- * File to send information received by the submission of form denoting receiving repair
+ * File to send information received by the submission of new repair form
  *
  * PHP version 8
  *
@@ -94,15 +94,10 @@ function sendRepairEmail($formData)
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
-
-        // Add CC if specified
-        if (!empty($_POST['receiver-email'])) {
-            $mail->addCC($_POST['receiver-email'], $_GET['receiver']);
-        }
-
+        
         // Content
         $mail->isHTML(true);
-        $mail->Subject = 'Repair - Part Received -- Serial Number #' . ($formData['productSerialNumber'] ?? 'N/A');
+        $mail->Subject = 'Repair - Inbound Notice -- Serial Number #' . ($formData['productSerialNumber'] ?? 'N/A');
 
         // Generate email body
         $emailBody = generateRepairEmailBody($formData);
@@ -134,7 +129,7 @@ function generateRepairEmailBody($formData)
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Repair - Part Received</title>
+        <title>Repair - Inbound Notice</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -221,10 +216,9 @@ function generateRepairEmailBody($formData)
     </head>
     <body>
         <div class="header">
-            <h1>Repair - Part Received</h1>
+            <h1>Repair - Inbound Notice</h1>
             <p><strong>Serial Number:</strong> ' . htmlspecialchars($formData['productSerialNumber'] ?? 'N/A') . '</p>
-            <p><strong>Date:</strong> ' . htmlspecialchars($formData['receivedDate'] ?? 'N/A') . '</p>
-            <p><strong>Submitted:</strong> ' . date('Y-m-d H:i:s') . '</p>
+            <p><strong>Date Submitted:</strong> ' . date('Y-m-d') . '</p>
         </div>';
 
     // Information Section
@@ -233,12 +227,12 @@ function generateRepairEmailBody($formData)
         <h3>Repair Information</h3>
         <div class="info-grid">
             <div class="info-item">
-                <span class="info-label">Received Date:</span><br>
-                ' . htmlspecialchars($formData['receivedDate']) . '
+                <span class="info-label">Customer Name:</span><br>
+                ' . htmlspecialchars($formData['customerName'] ?? 'N/A') . '
             </div>
             <div class="info-item">
-                <span class="info-label">Receiver Name:</span><br>
-                ' . htmlspecialchars($formData['receivedBy']) . '
+                <span class="info-label">Issue Description:</span><br>
+                ' . htmlspecialchars($formData['issueDescription'] ?? 'No request info or issue description provided') . '
             </div>';
 
     $html .= '</div></div>';
@@ -255,17 +249,19 @@ function generateRepairEmailBody($formData)
  */
 function generatePlainTextVersion($formData)
 {
-    $text = "Repair - Received Part\n";
+    $text = "Repair - Inbound Notice \n";
     $text .= "================================\n\n";
 
     $text .= "Serial Number: " . ($formData['productSerialNumber'] ?? 'N/A') . "\n";
-    $text .= "Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
+    $text .= "Date Submitted: " . date('Y-m-d') . "\n\n";
 
     // Repair Information
     $text .= "REPAIR INFORMATION:\n";
-    $text .= "Received Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
-    $text .= "Receiver Name: " . ($formData['receivedBy'] ?? 'N/A') . "\n";
+    $text .= "Customer Name: " . ($formData['customerName'] ?? 'N/A') . "\n";
 
+    if (!empty($formData['issueDescription'])) {
+        $text .= "Issue Description: " . $formData['issueDescription'] . "\n";
+    }
     $text .= "\n";
     return $text;
 }
@@ -274,19 +270,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
     // get the information that was submitted from the form
     $serialNumber = $formData['productSerialNumber'];
-    $receivedDate = $formData['receivedDate'];
-    $status = 'NEEDS REPAIR';
+    $customerName = $formData['customerName'];
+    $issueDetails = $formData['issueDescription'] ?? '';
+    $selectedBattery = $formData['selectedBattery'];
+    $status = 'INBOUND';
     // SQL Insert Statement
-    sqlsrv_query($conn, "UPDATE dbo.Repairs SET Status = 'NEEDS REPAIR' WHERE SerialNumber = ?", [$serialNumber]);
-    $sql = "UPDATE dbo.Repairs SET DateReceived = ? WHERE SerialNumber = $serialNumber";
-    $params = [$receivedDate];
+    $sql = "INSERT INTO dbo.Repairs (SerialNumber, Requester, Details, Status) VALUES (?, ?, ?, ?, ?)";
+    $params = [$serialNumber, $customerName, $issueDetails, $status];
 
     // Creates the sql statement, establishes the connection, declares the statement and adds the values wishing to be inserted
     $stmt = sqlsrv_query($conn, $sql, $params);
 
-    // UPDATE TO ADD CASE IF REPAIR IS NOT IN TABLE!!!!!!!!
-    $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'NEEDS REPAIR' WHERE SN = $serialNumber";
-    sqlsrv_query($conn, $sqlAll);
+    // Check if SN is in All_Batteries Database
+    $check = sqlsrv_query($conn, "SELECT Status from dbo.All_Batteries WHERE SN = ?", [$serialNumber]);
+    if ($row = sqlsrv_fetch_array($check, SQLSRV_FETCH_ASSOC)){
+        $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'INBOUND' WHERE SN = ?";
+        $SNparams = [$serialNumber];
+    } else {
+        $sqlAll = "INSERT INTO dbo.All_Batteries (SN, BatteryType, Status) VALUES (?, ?, ?)";
+        $SNparams = [$serialNumber, $selectedBattery, $status];
+    }
+    sqlsrv_query($conn, $sqlAll,$SNparams);
     // throws an error if $stmt does not execute correctly and prints the error
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -308,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = sendRepairEmail($formData);
 
     if ($result['success']) {
-        echo "'Repair - Part Received Form' submitted and email sent successfully!";
+        echo "'Repair - Inbound Notice Form' submitted and email sent successfully!";
     } else {
         echo "Error: " . $result['message'];
     }

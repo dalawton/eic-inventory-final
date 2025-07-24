@@ -633,24 +633,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Insert POItems with correct prices
-    foreach ($processedProducts as $product) {
-        $sql = "INSERT INTO dbo.POItems (PONum, PN, Quantity, UnitPrice, Description, Total) VALUES (?, ?, ?, ?, ?, ?)";
-        $params = [
-            $purchaseOrderNumber,
-            $product['productNumber'],
-            $product['quantity'],
-            $product['unitPrice'],
-            $product['description'],
-            $product['total']
-        ];
-        $stmt = sqlsrv_query($conn, $sql, $params);
-        if ($stmt === false) {
-            error_log("POItem insert failed: " . print_r(sqlsrv_errors(), true));
-            die("Error inserting POItem: " . print_r(sqlsrv_errors(), true));
-        }
-    }
-
     $vendorDetails = null;
     if ($vendorName && $vendorName !== 'not_listed') {
         error_log("Looking up vendor details for vendorName: " . $vendorName);
@@ -673,6 +655,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt === false) {
         error_log("PO insert failed: " . print_r(sqlsrv_errors(), true));
         die("Error inserting PO: " . print_r(sqlsrv_errors(), true));
+    }
+
+    // Insert POItems with correct prices
+    foreach ($processedProducts as $product) {
+        $sql = "INSERT INTO dbo.POItems (PONum, PN, Quantity, UnitPrice, Description, Total) VALUES (?, ?, ?, ?, ?, ?)";
+        $params = [
+            $purchaseOrderNumber,
+            $product['productNumber'],
+            $product['quantity'],
+            $product['unitPrice'],
+            $product['description'],
+            $product['total']
+        ];
+        $stmt = sqlsrv_query($conn, $sql, $params);
+        if ($stmt === false) {
+            error_log("POItem insert failed: " . print_r(sqlsrv_errors(), true));
+            die("Error inserting POItem: " . print_r(sqlsrv_errors(), true));
+        }
     }
 
     // Send email

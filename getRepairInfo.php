@@ -64,7 +64,7 @@ if ($stmt === false) {
 $results = [];
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     if (isset($row['DateReceived']) && $row['DateReceived'] instanceof DateTime) {
-        $row['DateReceived'] = $row['DateReceived']->format('Y-m-d H:i:s');
+        $row['DateReceived'] = $row['DateReceived']->format('Y-m-d');
     }
     $results[] = $row;
 }

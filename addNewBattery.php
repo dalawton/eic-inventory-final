@@ -69,22 +69,10 @@ if ($stmt === false) {
 
 
 foreach ($partNumbers as $i => $pn) {
-    $sqlNum = "SELECT BatteryId FROM dbo.Battery WHERE Name = ?";
-    $stmtNum = sqlsrv_query($conn, $sqlNum, [$newBatteryName]);
-    if ($stmtNum === false) {
-        echo json_encode(['error' => 'Query failed']);
-        exit;
-    }
-    $batteryIdRow = sqlsrv_fetch_array($stmtNum, SQLSRV_FETCH_ASSOC);
-    $batteryId = $batteryIdRow['BatteryId'] ?? null;
-    if (!$batteryId) {
-        echo "Could not find BatteryId for $newBatteryName";
-        exit;
-    }
     $desc = $descriptions[$i] ?? '';
     $amt = $amountsUsed[$i] ?? 0;
-    $sqlPNs = "INSERT INTO dbo.PartsForBatteries (BatteryId, PN, Amount) VALUES (?, ?, ?)"; // phpcs:ignore
-    $params = [$batteryId, $pn, $amt];
+    $sqlPNs = "INSERT INTO dbo.PartsForBatteries (BatteryName, PN, Amount) VALUES (?, ?, ?)"; // phpcs:ignore
+    $params = [$newBatteryName, $pn, $amt];
     $stmtIns = sqlsrv_query($conn, $sqlPNs, $params);
 
     if ($stmtIns === false) {

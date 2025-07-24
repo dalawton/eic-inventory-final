@@ -58,7 +58,7 @@ $sNum = $_POST['SN'] ?? null;
 $sql = "UPDATE dbo.All_Batteries SET Status = 'SHIPPED' WHERE SN = $sNum";
 sqlsrv_query($conn, $sql);
 
-echo "PO items processed and inventory updated!";
+echo "Battery processed and inventory updated!";
 ?>
 <html>
     <head>

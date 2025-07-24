@@ -89,12 +89,12 @@ if ($conn === false) {
                 </div>
             </div>
             <div class="navigation">
-                    <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
-                        Go Back
-                    </button>
-                    <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
-                        Report an Issue
-                    </button>
+                <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
+                    Go Back
+                </button>
+                <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
+                    Report an Issue
+                </button>
             </div>
         </div>
     </body>

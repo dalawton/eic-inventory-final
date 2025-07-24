@@ -161,9 +161,9 @@ $stmt = sqlsrv_query($conn, $sql);
             font-size: 0.95em;
             }
 
-            .product-table td span.status-received { background: #2196f3; }
+            .product-table td span.status-inbound { background: #2196f3; }
             .product-table td span.status-completed { background: #4caf50; }
-            .product-table td span.status-cancelled { background: #f44336; }
+            .product-table td span.status-received { background: #f44336; }
             .product-table td span.status-other { background: #888; }
                 
             @media (max-width: 1200px) {
@@ -228,12 +228,12 @@ $stmt = sqlsrv_query($conn, $sql);
                                 echo "<tr>";
                                 foreach ($row as $value) {
                                     $statusClass = "status-other";
-                                    if ($value === "Received") {
-                                        $statusClass = "status-recieved";
-                                    } elseif ($value === "Completed") {
+                                    if ($value === "NEEDS REPAIR") {
+                                        $statusClass = "status-received";
+                                    } elseif ($value === "SHIPPED") {
                                         $statusClass = "status-completed";
-                                    } elseif ($value === "Cancelled") {
-                                        $statusClass = "status-cancelled";
+                                    } elseif ($value === "INBOUND") {
+                                        $statusClass = "status-inbound";
                                     } else {
                                         $statusClass = "status-other";
                                     }
@@ -253,12 +253,12 @@ $stmt = sqlsrv_query($conn, $sql);
                                     echo "<tr>";
                                     foreach ($row as $value) {
                                         $statusClass = "status-other";
-                                        if ($value === "Received") {
-                                            $statusClass = "status-recieved";
-                                        } elseif ($value === "Completed") {
+                                        if ($value === "NEEDS REPAIR") {
+                                            $statusClass = "status-received";
+                                        } elseif ($value === "SHIPPED") {
                                             $statusClass = "status-completed";
-                                        } elseif ($value === "Cancelled") {
-                                            $statusClass = "status-cancelled";
+                                        } elseif ($value === "INBOUND") {
+                                            $statusClass = "status-inbound";
                                         } else {
                                             $statusClass = "status-other";
                                         }

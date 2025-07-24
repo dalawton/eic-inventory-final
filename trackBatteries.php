@@ -60,9 +60,9 @@ if (isset($_GET['searchSN']) && $_GET['searchSN'] !== '') {
     $params = ["%$search%"];
 }
 
-elseif (isset($_GET['searchBT']) && $_GET['searchBT'] !== '') {
-    $search = $_GET['searchBT'];
-    $where = "WHERE BatteryType LIKE ?";
+elseif (isset($_GET['searchBN']) && $_GET['searchBN'] !== '') {
+    $search = $_GET['searchBN'];
+    $where = "WHERE BatteryName LIKE ?";
     $params = ["%$search%"];
 }
 
@@ -72,7 +72,7 @@ elseif (isset($_GET['searchStatus']) && $_GET['searchStatus'] !== '') {
     $params = ["%$search%"];
 }
 
-$sql = "SELECT SN, BatteryType, Status FROM dbo.All_Batteries $where ORDER BY SN DESC";
+$sql = "SELECT SN, BatteryName, Status FROM dbo.All_Batteries $where ORDER BY SN DESC";
 $stmt = sqlsrv_query($conn, $sql, $params);
 
 if ($stmt === false) {
@@ -147,7 +147,7 @@ if ($stmt === false) {
         <div class="form-content">
             <form class="form-control" style="padding-left: 130px;" method="get" action="">
                 <input type="search" class="form-control" name="searchSN" placeholder="Search by Serial Number" value="<?php echo htmlspecialchars($_GET['searchSN'] ?? '') ?>">
-                <input type="search" class="form-control" name="searchBT" placeholder="Search by Battery Type" value="<?php echo htmlspecialchars($_GET['searchBT'] ?? '') ?>">
+                <input type="search" class="form-control" name="searchBN" placeholder="Search by Battery Name" value="<?php echo htmlspecialchars($_GET['searchBN'] ?? '') ?>">
                 <input type="search" class="form-control" name="searchStatus" placeholder="Search by Status" value="<?php echo htmlspecialchars($_GET['searchStatus'] ?? '') ?>">
                 <button type="submit" class="btn btn-secondary">Search</button>
                 <?php if ($search) : ?>

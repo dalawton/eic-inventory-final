@@ -63,7 +63,9 @@ try {
     // Enable debug output for testing (remove in production)
     // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
     // $mail->Debugoutput = 'html';
-
+    $file = $_FILES['attachment'];
+    $file_name = $_FILES['attachment']['name'];
+    $file_tmp = $_FILES['attachment']['tmp_name'];
     // Server settings
     $mail->isSMTP();
     $mail->Host = 'smtp.office365.com';
@@ -72,6 +74,7 @@ try {
     $mail->Password = $_ENV['SMTP_PASSWORD'];
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
+    $mail->addAttachment($_GET[]);
 
     // Prevent hanging
     $mail->Timeout = 30;
@@ -116,6 +119,7 @@ try {
     $body .= "</body></html>";
 
     $mail->Body = $body;
+    $mail->addAttachment($file_tmp, $file_name);
 
     // Plain text version
     $altBody = "New Issue Submission\n\n";

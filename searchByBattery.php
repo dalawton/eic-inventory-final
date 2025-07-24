@@ -51,21 +51,17 @@ if ($conn === false) {
 }
 
 // Get all batteries for dropdown
-$batteriesQuery = "SELECT BatteryId, Name FROM dbo.Battery ORDER BY Name";
+$batteriesQuery = "SELECT BatteryName FROM dbo.Battery";
 $batteriesStmt = sqlsrv_query($conn, $batteriesQuery);
-$batteries = [];
-if ($batteriesStmt !== false) {
-    while ($row = sqlsrv_fetch_array($batteriesStmt, SQLSRV_FETCH_ASSOC)) {
-        $batteries[] = $row;
-    }
+if ($batteriesStmt === false) {
+    die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
-
 // Handle AJAX request for battery parts
 if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
-    $batteryId = $_POST['batteryId'] ?? 0;
+    $batteryName = $_POST['batteryName'] ?? 0;
     
     // Debug: Log the request
-    error_log("Battery ID requested: " . $batteryId);
+    error_log("Battery Name requested: " . $batteryName);
     
     $sql = "SELECT 
                 pfb.PN, 
@@ -74,17 +70,17 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
                 ISNULL(inv.Amount, 0) as InventoryAmount
             FROM dbo.PartsForBatteries pfb
             LEFT JOIN dbo.Inventory inv ON pfb.PN = inv.PN
-            WHERE pfb.BatteryId = ?
+            WHERE pfb.BatteryName = ?
             ORDER BY pfb.PN";
     
-    $stmt = sqlsrv_query($conn, $sql, [$batteryId]);
+    $stmt = sqlsrv_query($conn, $sql, [$batteryName]);
     $parts = [];
     
     if ($stmt !== false) {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             $parts[] = $row;
         }
-        error_log("Found " . count($parts) . " parts for battery ID " . $batteryId);
+        error_log("Found " . count($parts) . " parts for battery name " . $batteryName);
     } else {
         error_log("SQL Error: " . print_r(sqlsrv_errors(), true));
         $parts = ['error' => 'Database query failed', 'details' => sqlsrv_errors()];
@@ -95,7 +91,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
     exit;
 }
 
-sqlsrv_close($conn);
 ?>
 
 <!DOCTYPE html>
@@ -138,13 +133,13 @@ sqlsrv_close($conn);
         <div class="form-content">
             <div class="form-group">
                 <label for="batterySelect">Select Battery:</label>
-                <select class="form-control" id="batterySelect" onchange="loadBatteryParts()">
+                <select name="batterySelect" class="form-control" id="batterySelect" onchange="loadBatteryParts()">
                     <option value="">-- Select a Battery --</option>
-                    <?php foreach ($batteries as $battery): ?>
-                        <option value="<?php echo htmlspecialchars($battery['BatteryId']); ?>">
-                            <?php echo htmlspecialchars($battery['Name']); ?>
-                        </option>
-                    <?php endforeach; ?>
+                    <?php while ($row = sqlsrv_fetch_array($batteriesStmt, SQLSRV_FETCH_ASSOC)): ?>
+                    <option value="<?php echo htmlspecialchars($row['BatteryName']) ?>">
+                        <?php echo htmlspecialchars($row['BatteryName']) ?>
+                    </option>
+                    <?php endwhile; ?>
                 </select>
             </div>
             <br>
@@ -188,12 +183,12 @@ sqlsrv_close($conn);
         let currentParts = [];
         
         function loadBatteryParts() {
-            const batteryId = document.getElementById('batterySelect').value;
+            const batteryName = document.getElementById('batterySelect').value;
             const loading = document.getElementById('loading');
             const table = document.getElementById('partsTable');
             const header = document.getElementById('header');
             
-            if (!batteryId) {
+            if (!batteryName) {
                 table.style.display = 'none';
                 header.style.display = 'none';
                 return;
@@ -205,7 +200,7 @@ sqlsrv_close($conn);
             
             const formData = new FormData();
             formData.append('action', 'getBatteryParts');
-            formData.append('batteryId', batteryId);
+            formData.append('batteryName', batteryName);
             
             fetch('', {
                 method: 'POST',
