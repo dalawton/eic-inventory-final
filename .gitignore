@@ -17,6 +17,7 @@
 *.sql
 *.config
 /vendor
+*.xlsx
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
