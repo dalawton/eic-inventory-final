@@ -69,8 +69,8 @@ if ($stmt === false) {
 } else {
     echo "Record added successfully.";
     // Log the action
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity) VALUES (?, ?, ?, ?)"; // phpcs:ignore
-    $logParams = ['add', $productNumber, $description, $quantity];
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, TableAffected, ProductNumber, Description, Quantity) VALUES (?, ?, ?, ?, ?)"; // phpcs:ignore
+    $logParams = ['Add', 'Inventory', $productNumber, $description, $quantity];
     sqlsrv_query($conn, $logSql, $logParams);
 }
 

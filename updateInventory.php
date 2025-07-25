@@ -78,8 +78,8 @@ if ($stmt === false) {
 } else {
     echo "Record updated successfully.";
     // Log the action
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity) VALUES (?, ?, ?, ?)";
-    $logParams = ['update', $id, $newDetails, $newValue];
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity, Status) VALUES (?, ?, ?, ?, ?)";
+    $logParams = ['Update', $id, $newDetails, $newValue, 'COMPLETE'];
     sqlsrv_query($conn, $logSql, $logParams);
 }
 // Free the statement and close the connection

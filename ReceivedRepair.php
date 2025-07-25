@@ -61,8 +61,6 @@ if ($stmt === false) {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
     <head>

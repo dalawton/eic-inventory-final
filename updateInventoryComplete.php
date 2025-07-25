@@ -58,11 +58,13 @@ if ($conn === false) {
 $selectedBattery = $_POST['selectedBattery'] ?? null;
 $amountUsed = $_POST['amount_Used'] ?? [];
 $serialNumber = $_POST['serialNumber'] ?? null;
-$selectedComponentSNs = $_POST['selectedComponentSNs'] ?? '';
+$selectedComponentSNs = $_POST['component_sns'] ?? [];
 
 // Process selected component serial numbers
 $componentSNs = [];
-if (!empty($selectedComponentSNs)) {
+if (!empty($selectedComponentSNs) && is_array($selectedComponentSNs)) {
+    $componentSNs = array_filter($selectedComponentSNs);
+} elseif (!empty($selectedComponentSNs) && is_string($selectedComponentSNs)) {
     $componentSNs = array_filter(explode(',', $selectedComponentSNs));
 }
 
@@ -87,7 +89,7 @@ try {
 
     // Add Serial Number into Battery Database
     if ($serialNumber) {
-        $sqlBattery = "INSERT INTO dbo.All_Batteries (SN, BatteryType, Status) VALUES (?,?,?)";
+        $sqlBattery = "INSERT INTO dbo.All_Batteries (SN, BatteryName, Status) VALUES (?,?,?)";
         $stmtBattery = sqlsrv_query($conn, $sqlBattery, [$serialNumber, $selectedBattery, "IN-HOUSE"]);
         
         if ($stmtBattery === false) {
@@ -95,47 +97,40 @@ try {
         }
     }
 
-    // Update status of selected components to "USED"
-    if (!empty($componentSNs)) {
-        foreach ($componentSNs as $componentSN) {
-            $componentSN = trim($componentSN);
-            if (!empty($componentSN)) {
-                // First check if component exists and is available
-                $checkComponentStmt = sqlsrv_query($conn, "SELECT Status FROM dbo.All_Batteries WHERE SN = ?", [$componentSN]);
-                $componentRow = sqlsrv_fetch_array($checkComponentStmt, SQLSRV_FETCH_ASSOC);
-                
-                if (!$componentRow) {
-                    throw new Exception("Component with serial number '$componentSN' not found.");
-                }
-                
-                if ($componentRow['Status'] !== 'IN-HOUSE') {
-                    throw new Exception("Component '$componentSN' is not available (current status: {$componentRow['Status']}).");
-                }
-                
-                $sqlUpdateComponent = "UPDATE dbo.All_Batteries SET Status = 'USED' WHERE SN = ?";
-                $stmtUpdateComponent = sqlsrv_query($conn, $sqlUpdateComponent, [$componentSN]);
-                
-                if ($stmtUpdateComponent === false) {
-                    throw new Exception("Failed to update component status for SN $componentSN: " . print_r(sqlsrv_errors(), true));
-                }
-                
-                // Optional: Create a relationship record between the new battery and its components
-                if ($serialNumber) {
-                    $sqlRelation = "INSERT INTO dbo.Battery_Components (ParentSN, ComponentSN, DateUsed) VALUES (?, ?, GETDATE())";
-                    $stmtRelation = sqlsrv_query($conn, $sqlRelation, [$serialNumber, $componentSN]);
-                    
-                    if ($stmtRelation === false) {
-                        throw new Exception("Failed to create component relationship: " . print_r(sqlsrv_errors(), true));
-                    }
-                }
+    foreach ($componentSNs as $componentSN) {
+        $checkComponentStmt = sqlsrv_query($conn, "SELECT Status FROM dbo.All_Batteries WHERE SN = ?", [$componentSN]);
+        $componentRow = sqlsrv_fetch_array($checkComponentStmt, SQLSRV_FETCH_ASSOC);
+        
+        if (!$componentRow) {
+            throw new Exception("Component with serial number '$componentSN' not found.");
+        }
+        
+        if ($componentRow['Status'] !== 'IN-HOUSE') {
+            throw new Exception("Component '$componentSN' is not available (current status: {$componentRow['Status']}).");
+        }
+        
+        $sqlUpdateComponent = "UPDATE dbo.All_Batteries SET Status = 'USED' WHERE SN = ?";
+        $stmtUpdateComponent = sqlsrv_query($conn, $sqlUpdateComponent, [$componentSN]);
+        
+        if ($stmtUpdateComponent === false) {
+            throw new Exception("Failed to update component status for SN $componentSN: " . print_r(sqlsrv_errors(), true));
+        }
+        
+        // Optional: Create a relationship record between the new battery and its components
+        if ($serialNumber) {
+            $sqlRelation = "INSERT INTO dbo.Battery_Components (ParentSN, ComponentSN, DateUsed) VALUES (?, ?, GETDATE())";
+            $stmtRelation = sqlsrv_query($conn, $sqlRelation, [$serialNumber, $componentSN]);
+            
+            if ($stmtRelation === false) {
+                throw new Exception("Failed to create component relationship: " . print_r(sqlsrv_errors(), true));
             }
         }
     }
 
     if ($selectedBattery) {
         // Get all parts for this battery
-        $sql = "SELECT * FROM dbo.PartsForBatteries WHERE BatteryName = ?";
-        $stmt = sqlsrv_query($conn, $sql, [$batteryName]);
+        $sql = "SELECT * FROM dbo.PartsForBatteries WHERE BatteryName = ? AND PN NOT IN (SELECT BatteryName from dbo.Battery WHERE Complete = 'No')";
+        $stmt = sqlsrv_query($conn, $sql, [$selectedBattery]);
         
         if ($stmt === false) {
             throw new Exception("Failed to get battery parts: " . print_r(sqlsrv_errors(), true));
@@ -195,8 +190,13 @@ try {
                     throw new Exception("Failed to insert inventory for extra part $pn: " . print_r(sqlsrv_errors(), true));
                 }
             }
+
+            $insertParts = sqlsrv_query($conn, "INSERT INTO dbo.PartsForBatteries (BatteryName, PN, Amount) VALUES (?, ?, ?)", [$selectedBattery, $pn, $amt]);
         }
     }
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Status) VALUES (?, ?, ?, ?)";
+    $logParams = ['Create Battery', $serialNumber, $selectedBattery, 'IN-HOUSE'];
+    sqlsrv_query($conn, $logSql, $logParams);
 
     // Commit transaction
     sqlsrv_commit($conn);

@@ -102,7 +102,7 @@ function sendRepairEmail($formData)
 
         // Content
         $mail->isHTML(true);
-        $mail->Subject = 'Repair - Part Received -- Serial Number #' . ($formData['productSerialNumber'] ?? 'N/A');
+        $mail->Subject = 'Repair - Part Received -- Serial Number #' . ($formData['serialNumber'] ?? 'N/A');
 
         // Generate email body
         $emailBody = generateRepairEmailBody($formData);
@@ -222,8 +222,7 @@ function generateRepairEmailBody($formData)
     <body>
         <div class="header">
             <h1>Repair - Part Received</h1>
-            <p><strong>Serial Number:</strong> ' . htmlspecialchars($formData['productSerialNumber'] ?? 'N/A') . '</p>
-            <p><strong>Date:</strong> ' . htmlspecialchars($formData['receivedDate'] ?? 'N/A') . '</p>
+            <p><strong>Serial Number:</strong> ' . htmlspecialchars($formData['serialNumber'] ?? 'N/A') . '</p>
             <p><strong>Submitted:</strong> ' . date('Y-m-d H:i:s') . '</p>
         </div>';
 
@@ -238,7 +237,7 @@ function generateRepairEmailBody($formData)
             </div>
             <div class="info-item">
                 <span class="info-label">Receiver Name:</span><br>
-                ' . htmlspecialchars($formData['receivedBy']) . '
+                ' . htmlspecialchars($formData['receiver']) . '
             </div>';
 
     $html .= '</div></div>';
@@ -258,13 +257,13 @@ function generatePlainTextVersion($formData)
     $text = "Repair - Received Part\n";
     $text .= "================================\n\n";
 
-    $text .= "Serial Number: " . ($formData['productSerialNumber'] ?? 'N/A') . "\n";
+    $text .= "Serial Number: " . ($formData['serialNumber'] ?? 'N/A') . "\n";
     $text .= "Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
 
     // Repair Information
     $text .= "REPAIR INFORMATION:\n";
     $text .= "Received Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
-    $text .= "Receiver Name: " . ($formData['receivedBy'] ?? 'N/A') . "\n";
+    $text .= "Receiver Name: " . ($formData['receiver'] ?? 'N/A') . "\n";
 
     $text .= "\n";
     return $text;
@@ -272,49 +271,67 @@ function generatePlainTextVersion($formData)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
-    // get the information that was submitted from the form
-    $serialNumber = $formData['productSerialNumber'];
+    $serialNumber = $formData['serialNumber'];
     $receivedDate = $formData['receivedDate'];
+    $receivedBy = $formData['receiver'];
     $status = 'NEEDS REPAIR';
-    // SQL Insert Statement
-    sqlsrv_query($conn, "UPDATE dbo.Repairs SET Status = 'NEEDS REPAIR' WHERE SerialNumber = ?", [$serialNumber]);
-    $sql = "UPDATE dbo.Repairs SET DateReceived = ? WHERE SerialNumber = $serialNumber";
-    $params = [$receivedDate];
-
-    // Creates the sql statement, establishes the connection, declares the statement and adds the values wishing to be inserted
-    $stmt = sqlsrv_query($conn, $sql, $params);
-
-    // UPDATE TO ADD CASE IF REPAIR IS NOT IN TABLE!!!!!!!!
-    $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'NEEDS REPAIR' WHERE SN = $serialNumber";
-    sqlsrv_query($conn, $sqlAll);
-    // throws an error if $stmt does not execute correctly and prints the error
-    if ($stmt === false) {
-        die(print_r(sqlsrv_errors(), true));
-
-        // if the $stmt statement executes correctly, a confirmation sentance will be printed
-    } else {
-        echo "Record added successfully. \n";
+    $sql1 = "UPDATE dbo.Repairs SET Status = ? WHERE SerialNumber = ?";
+    $stmt1 = sqlsrv_query($conn, $sql1, [$status, $serialNumber]);
+    
+    if ($stmt1 === false) {
+        die("Error updating repair status: " . print_r(sqlsrv_errors(), true));
     }
-
-    // After successful insert into Repairs table
+    
+    $sql2 = "UPDATE dbo.Repairs SET DateReceived = ? WHERE SerialNumber = ?";
+    $stmt2 = sqlsrv_query($conn, $sql2, [$receivedDate, $serialNumber]);
+    
+    if ($stmt2 === false) {
+        die("Error updating received date: " . print_r(sqlsrv_errors(), true));
+    }
+    
+    $sql3 = "UPDATE dbo.All_Batteries SET Status = ? WHERE SN = ?";
+    $stmt3 = sqlsrv_query($conn, $sql3, [$status, $serialNumber]);
+    
+    if ($stmt3 === false) {
+        die("Error updating battery status: " . print_r(sqlsrv_errors(), true));
+    }
+    
+    echo "Record updated successfully.\n";
+    
+    $customerName = $formData['customerName'] ?? 'Unknown';
+    $issueDetails = $formData['issueDetails'] ?? 'Repair received';
+    
+    // Insert into InventoryLog
     $logSql = "INSERT INTO dbo.InventoryLog 
-        (ActionType, TableAffected, RepairSerialNumber, RepairRequester, RepairDetails, RepairStatus) 
-        VALUES (?, ?, ?, ?, ?, ?)";
+        (ActionType, TableAffected, ProductNumber, Description, Status) 
+        VALUES (?, ?, ?, ?, ?)";
     $logParams = [
-        'add', 'Repairs', $serialNumber, $customerName, $issueDetails, $status
+        'Update',
+        'Repairs',
+        $serialNumber,
+        $issueDetails, 
+        $status
     ];
-    sqlsrv_query($conn, $logSql, $logParams);
-
+    
+    $logStmt = sqlsrv_query($conn, $logSql, $logParams);
+    
+    if ($logStmt === false) {
+        die("Error inserting log entry: " . print_r(sqlsrv_errors(), true));
+    }
+    
     $result = sendRepairEmail($formData);
-
+    
     if ($result['success']) {
         echo "'Repair - Part Received Form' submitted and email sent successfully!";
     } else {
         echo "Error: " . $result['message'];
     }
+    
+    sqlsrv_free_stmt($stmt1);
+    sqlsrv_free_stmt($stmt2);
+    sqlsrv_free_stmt($stmt3);
+    sqlsrv_free_stmt($logStmt);
 }
 
-
-// frees up the $stmt variable and closes the connection to allow for additional statements and security for the server
-sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
+?>

@@ -86,7 +86,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
     if (strpos($partNumberLower, 'subpack') !== false) {
         
         $sql1 = "SELECT SN FROM dbo.All_Batteries 
-                WHERE BatteryName LIKE '%SUBPACK%' 
+                WHERE BatteryName LIKE '$partNumber' 
                 AND Status = 'IN-HOUSE'
                 ORDER BY SN";
         $stmt = sqlsrv_query($conn, $sql1);
@@ -99,7 +99,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
     } elseif (strpos($partNumberLower, 'cellpack') !== false) {
         
         $sql2 = "SELECT SN FROM dbo.All_Batteries 
-                WHERE BatteryName LIKE '%CELLPACK%' 
+                WHERE BatteryName LIKE '$partNumber' 
                 AND Status = 'IN-HOUSE'
                 ORDER BY SN";
         $stmt = sqlsrv_query($conn, $sql2);
@@ -111,7 +111,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
     } elseif (strpos($partNumberLower, 'module') !== false) {
         
         $sql3 = "SELECT SN FROM dbo.All_Batteries 
-                WHERE BatteryName LIKE '%MODULE%' 
+                WHERE BatteryName LIKE '$partNumber' 
                 AND Status = 'IN-HOUSE'
                 ORDER BY SN";
         $stmt = sqlsrv_query($conn, $sql3);
@@ -256,11 +256,10 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                         </script>
                     </div>
                 </form>
-                <div class="form-section">
-                    <!-- Existing Battery Form -->
-                    <form id="existingBatteryForm" class="battery-form" method="POST" 
-                        action="updateInventoryComplete.php" style="display:none;">
-                        
+                <!-- Existing Battery Form -->
+                <form id="existingBatteryForm" class="battery-form" method="POST" 
+                    action="updateInventoryComplete.php" style="display:none;">
+                    <div class="form-section">
                         <div class="table-header">
                             <h2>Parts Used for Battery 
                                 <?php echo htmlspecialchars($selectedBattery) ?> </h2>
@@ -292,18 +291,18 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                                 
                                 if (strpos($partNumberLower, 'subpack') !== false) {
                                     $isComponentPart = true;
-                                    $componentType = 'subpack';
+                                    $componentType = $partNumber;
                                 } elseif (strpos($partNumberLower, 'cellpack') !== false) {
                                     $isComponentPart = true;
-                                    $componentType = 'cellpack';
+                                    $componentType = $partNumber;
                                 }  elseif (strpos($partNumberLower, 'module') !== false) {
                                     $isComponentPart = true;
-                                    $componentType = 'module';
+                                    $componentType = $partNumber;
                                 }
                             ?>
                             <tr <?php echo $isComponentPart ? 'class="component-row"' : ''; ?>>
                                 <td><?php echo htmlspecialchars($partNumber) ?></td>
-                                <td id="desc-<?php echo $index ?>">
+                                <td style="width:20px;" id="desc-<?php echo $index ?>">
                                     <?php echo htmlspecialchars($item['Description'] ?? '') ?></td>
                                 <td><input type="number" class="form-control" style="color:#7a7d80"
                                     name="amount_Used[]" 
@@ -349,9 +348,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                         <div class="action-buttons">
                             <button type="submit" id="submitCompleted" class="btn btn-secondary">Mark as Completed</button>
                         </div>
-                    </form>
-                    <!-- New Battery Form -->
-                    <form id="newBatteryForm" method="POST" action="addNewBattery.php" style="display:none;">
+                    </div>
+                </form>
+                <!-- New Battery Form -->
+                <form id="newBatteryForm" method="POST" action="addNewBattery.php" style="display:none;">
+                    <div class="form-section">
                         <div class="form-group">
                             <label for="newBatteryName">New Battery Name</label>
                             <input type="text" id="newBatteryName" name="newBatteryName" class="form-control">
@@ -388,8 +389,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                                 <button type="submit" id="submitNew" class="btn btn-secondary">Mark as Completed</button>
                             </div>
                         </div>
-                    </form>
-                </div>   
+                    </div>
+                </form>  
             </div>
             <!-- Navigation -->
             <div class="navigation">
@@ -460,7 +461,7 @@ $(document).ready(function() {
                            onchange="updateSelectedComponents()">
                     <label for="${checkboxId}">
                         ${component.SN}<br>
-                        <small style="color: #666;">${component.BatteryType}</small>
+                        <small style="color: #666;">${partNumber}</small>
                     </label>
                 </div>
             `;
@@ -509,7 +510,22 @@ $(document).ready(function() {
             return false;
         }
     });
-});
+
+    $('#existingBatteryForm').on('submit', function(e) {
+        var selectedComponents = [];
+        $('input[name="component_sns[]"]:checked').each(function() {
+            selectedComponents.push($(this).val());
+        });
+        
+        if (selectedComponents.length > 0) {
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'selectedComponentSNs',
+                value: selectedComponents.join(',')
+            }).appendTo(this);
+        }
+    });
+})
 </script>
 
 <script>

@@ -77,8 +77,8 @@ if ($stmt === false) {
 } else {
     echo "Record deleted successfully.";
     // Log the action
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Quantity, Description) VALUES (?, ?, ?, ?)";
-    $logParams = ['delete', $productNumber, $amount, $details];
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, TableAffected, ProductNumber, Quantity, Description) VALUES (?, ?, ?, ?, ?)";
+    $logParams = ['Delete','Inventory', $productNumber, $amount, $details];
     sqlsrv_query($conn, $logSql, $logParams);
 }
 // Free the statement and close the connection

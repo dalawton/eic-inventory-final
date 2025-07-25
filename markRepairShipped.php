@@ -310,10 +310,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // After updating Repairs table
     $logSql = "INSERT INTO dbo.InventoryLog 
-        (ActionType, TableAffected, RepairSerialNumber, RepairRequester, RepairDetails, RepairStatus) 
-        VALUES (?, ?, ?, ?, ?, ?)";
+        (ActionType, TableAffected, ProductNumber, Description, Status) 
+        VALUES (?, ?, ?, ?, ?)";
     $logParams = [
-        'update', 'Repairs', $serialNum, '', $repairNotes, 'Completed'
+        'Update', 'Repairs', $serialNum, $repairNotes, 'SHIPPED'
     ];
     sqlsrv_query($conn, $logSql, $logParams);
 

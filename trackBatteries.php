@@ -59,25 +59,25 @@ if (isset($_GET['searchSN']) && $_GET['searchSN'] !== '') {
     $where = "WHERE SN LIKE ?";
     $params = ["%$search%"];
 }
-
-elseif (isset($_GET['searchBN']) && $_GET['searchBN'] !== '') {
-    $search = $_GET['searchBN'];
+if (isset($_GET['batterySelect']) && $_GET['batterySelect'] !== '') {
+    $search = $_GET['batterySelect'];
     $where = "WHERE BatteryName LIKE ?";
-    $params = ["%$search%"];
+    $params = ["%$search"];
 }
-
-elseif (isset($_GET['searchStatus']) && $_GET['searchStatus'] !== '') {
-    $search = $_GET['searchStatus'];
+if (isset($_GET['statusSelect']) && $_GET['statusSelect'] !== '') {
+    $search = $_GET['statusSelect'];
     $where = "WHERE Status LIKE ?";
-    $params = ["%$search%"];
+    $params = ["%$search"];
 }
 
 $sql = "SELECT SN, BatteryName, Status FROM dbo.All_Batteries $where ORDER BY SN DESC";
 $stmt = sqlsrv_query($conn, $sql, $params);
 
-if ($stmt === false) {
-    die("Query failed: " . print_r(sqlsrv_errors(), true));
-}
+$sqlBatteryType = "SELECT BatteryName FROM dbo.Battery";
+$batteriesStmt = sqlsrv_query($conn, $sqlBatteryType);
+
+$sqlStatusType = "SELECT DISTINCT Status FROM dbo.All_Batteries";
+$statusStmt = sqlsrv_query($conn, $sqlStatusType);
 ?>
 
 <!DOCTYPE html>
@@ -136,6 +136,8 @@ if ($stmt === false) {
         .product-table td span.status-shipped_out { background: #4caf50; }
         .product-table td span.status-needs_repair { background: #f44336; }
         .product-table td span.status-in_house { background: #f8a232ff; }
+        .product-table td span.status-used { background: #839172ff; }
+        .product-table td span.status-inbound { background: #1f55ebff; }
         .product-table td span.status-other { background: #888; }
     </style>
 </head>
@@ -145,17 +147,31 @@ if ($stmt === false) {
             <h1>All Batteries</h1>
         </div>
         <div class="form-content">
-            <form class="form-control" style="padding-left: 130px;" method="get" action="">
-                <input type="search" class="form-control" name="searchSN" placeholder="Search by Serial Number" value="<?php echo htmlspecialchars($_GET['searchSN'] ?? '') ?>">
-                <input type="search" class="form-control" name="searchBN" placeholder="Search by Battery Name" value="<?php echo htmlspecialchars($_GET['searchBN'] ?? '') ?>">
-                <input type="search" class="form-control" name="searchStatus" placeholder="Search by Status" value="<?php echo htmlspecialchars($_GET['searchStatus'] ?? '') ?>">
-                <button type="submit" class="btn btn-secondary">Search</button>
-                <?php if ($search) : ?>
-                    <a href="trackBatteries.php">Clear</a>
-                <?php endif; ?>
-            </form>
+                <form class="form-control" method="get" action="">
+                    <input type="search" style="width: 27%; margin-right: 10px;" class="form-control" name="searchSN" placeholder="Search by Serial Number" value="<?php echo htmlspecialchars($_GET['searchSN'] ?? '') ?>">
+                    <select name="batterySelect" style="width: 27%; margin-right: 10px;" class="form-control" id="batterySelect" onchange="this.form.submit()">
+                        <option value="">-- Filter by Battery Type --</option>
+                        <?php while ($row = sqlsrv_fetch_array($batteriesStmt, SQLSRV_FETCH_ASSOC)) : ?>
+                            <option value="<?php echo htmlspecialchars($row['BatteryName']) ?>">
+                                <?php echo htmlspecialchars($row['BatteryName']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                    <select name="statusSelect" style="width: 27%; margin-right: 10px;" class="form-control" id="statusSelect" onchange="this.form.submit()">
+                        <option value="">-- Filter by Status --</option>
+                        <?php while ($row = sqlsrv_fetch_array($statusStmt, SQLSRV_FETCH_ASSOC)) : ?>
+                            <option value="<?php echo htmlspecialchars($row['Status']) ?>">
+                                <?php echo htmlspecialchars($row['Status']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                    <button type="submit" class="btn btn-secondary">Search</button>
+                    <?php if ($search) : ?>
+                        <a href="trackBatteries.php">Clear</a>
+                    <?php endif; ?>
+                </form>
             <div class="product-table-container">
-                <table class="product-table" border="1">
+                <table class="product-table" name="partsTable" id="partsTable" border="1">
                     <tr>
                         <?php
                         echo "<div class='table-header'>";
@@ -176,6 +192,10 @@ if ($stmt === false) {
                                     $statusClass = "status-needs_repair";
                                 } elseif ($statusType === "IN-HOUSE") {
                                     $statusClass = "status-in_house";
+                                } elseif ($statusType === "USED") {
+                                    $statusClass = "status-used";
+                                } elseif ($statusType === "INBOUND") {
+                                    $statusClass = "status-inbound";
                                 } else {
                                     $statusClass = "status-other";
                                 }
@@ -199,6 +219,10 @@ if ($stmt === false) {
                                         $statusClass = "status-needs_repair";
                                     } elseif ($statusType === "IN-HOUSE") {
                                         $statusClass = "status-in_house";
+                                    } elseif ($statusType === "INBOUND") {
+                                        $statusClass = "status-inbound";
+                                    } elseif ($statusType === "USED") {
+                                        $statusClass = "status-used";
                                     } else {
                                         $statusClass = "status-other";
                                     }

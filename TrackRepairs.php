@@ -162,6 +162,7 @@ $stmt = sqlsrv_query($conn, $sql);
             }
 
             .product-table td span.status-inbound { background: #2196f3; }
+            .product-table td span.status-in-house { background: #f89f39ff; }
             .product-table td span.status-completed { background: #4caf50; }
             .product-table td span.status-received { background: #f44336; }
             .product-table td span.status-other { background: #888; }
@@ -232,8 +233,10 @@ $stmt = sqlsrv_query($conn, $sql);
                                         $statusClass = "status-received";
                                     } elseif ($value === "SHIPPED") {
                                         $statusClass = "status-completed";
-                                    } elseif ($value === "INBOUND") {
+                                    } elseif ($value === "IN-BOUND") {
                                         $statusClass = "status-inbound";
+                                    } elseif ($value === "IN-HOUSE") {
+                                        $statusClass = "status-in-house";
                                     } else {
                                         $statusClass = "status-other";
                                     }
@@ -257,8 +260,10 @@ $stmt = sqlsrv_query($conn, $sql);
                                             $statusClass = "status-received";
                                         } elseif ($value === "SHIPPED") {
                                             $statusClass = "status-completed";
-                                        } elseif ($value === "INBOUND") {
+                                        } elseif ($value === "IN-BOUND") {
                                             $statusClass = "status-inbound";
+                                        } elseif ($value === "IN-HOUSE") {
+                                            $statusClass = "status-in-house";
                                         } else {
                                             $statusClass = "status-other";
                                         }

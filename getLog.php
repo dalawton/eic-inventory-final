@@ -55,7 +55,7 @@ $stmt = sqlsrv_query($conn, $sql);
 <head>
     <meta charset="UTF-8">
     <title>Inventory & Repair Action Log</title>
-    <link rel="stylesheet" href="styleTracking.css">
+    <link rel="stylesheet" href="styleRepair.css">
     <style>
         .log-table th, .log-table td {
             text-align: center;
@@ -103,7 +103,6 @@ $stmt = sqlsrv_query($conn, $sql);
             <h1>Inventory & Repair Action Log</h1>
             <p>View all add, update, and delete actions performed on inventory and repairs.</p>
             <br>
-            <p><strong>NOTE: THE REVERT BUTTON MAY NOT WORK IF OPERATIONS HAVE BEEN PERFORMED USING CHANGED DATA</strong></p>
         </div>
         <div class="form-content">
             <div class="form-section">
@@ -119,16 +118,11 @@ $stmt = sqlsrv_query($conn, $sql);
                             <th>Product Number</th>
                             <th>Description</th>
                             <th>Quantity</th>
-                            <th>Repair Serial #</th>
                             <th>Repair Requester</th>
-                            <th>Repair Details</th>
-                            <th>Repair Status</th>
-                            <th>Reverted</th>
-                            <th>Revert</th>
+                            <th>Status</th>
                         </tr>
                         <?php
                         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                            $isReverted = isset($row['Reverted']) && $row['Reverted'];
                             $actionType = strtolower($row['ActionType']);
                             $tableType = strtolower($row['TableAffected'] ?? '');
                             $actionClass = "action-other";
@@ -141,33 +135,14 @@ $stmt = sqlsrv_query($conn, $sql);
                             }
                             $tableClass = $tableType === "repairs" ? "table-repairs" : "table-inventory";
                             echo "<tr" . ($isReverted ? " class='reverted'" : "") . ">";
-                            echo "<td>" . htmlspecialchars($row['ActionTime']->format('Y-m-d')) . "</td>";
-                            echo "<td><span class='action-label $actionClass'>" . htmlspecialchars(ucfirst($row['ActionType'])) . "</span></td>";
-                            echo "<td><span class='$tableClass'>" . htmlspecialchars($row['TableAffected'] ?? '') . "</span></td>";
-                            echo "<td>" . htmlspecialchars($row['ProductNumber'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['Description'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['Quantity'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['RepairSerialNumber'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['RepairRequester'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['RepairDetails'] ?? '') . "</td>";
-                            echo "<td>" . htmlspecialchars($row['RepairStatus'] ?? '') . "</td>";
-                            echo "<td>";
-                            if ($isReverted) {
-                                echo "<span class='reverted-label'>Yes</span>";
-                            } else {
-                                echo "No";
-                            }
-                            echo "</td>";
-                            echo "<td>";
-                            if (!$isReverted) {
-                                echo "<form method='POST' action='revertLog.php' style='margin:0;'>
-                                        <input type='hidden' name='logId' value='" . htmlspecialchars($row['LogId']) . "'>
-                                        <button type='submit' class='btn btn-secondary' onclick=\"return confirm('Are you sure you want to revert this action?');\">Revert</button>
-                                      </form>";
-                            } else {
-                                echo "<span style='color:gray;'>Reverted</span>";
-                            }
-                            echo "</td>";
+                            echo "<td style='width: 10%;'>" . htmlspecialchars($row['ActionTime']->format('Y-m-d')) . "</td>";
+                            echo "<td style='width: 12%;'><span class='action-label $actionClass'>" . htmlspecialchars(ucfirst($row['ActionType'])) . "</span></td>";
+                            echo "<td style='width: 8%;'><span class='$tableClass'>" . htmlspecialchars($row['TableAffected'] ?? '') . "</span></td>";
+                            echo "<td style='width: 14%;'>" . htmlspecialchars($row['ProductNumber'] ?? '') . "</td>";
+                            echo "<td style='width: 30%;'>" . htmlspecialchars($row['Description'] ?? '') . "</td>";
+                            echo "<td style='width: 4%;'>" . htmlspecialchars($row['Quantity'] ?? '') . "</td>";
+                            echo "<td style='width: 10%;'>" . htmlspecialchars($row['RepairRequester'] ?? '') . "</td>";
+                            echo "<td style='width: 12%;'>" . htmlspecialchars($row['Status'] ?? '') . "</td>";
                             echo "</tr>";
                         }
                         ?>

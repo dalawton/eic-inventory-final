@@ -48,7 +48,8 @@ $connectionOptions = [
 // Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-$sql = "SELECT SN FROM dbo.All_Batteries WHERE Status != 'SHIPPED'";
+// UPDATE TO ONLY HAVE BATTERIES OF 'COMPLETE' TYPE (from dbo.Battery)
+$sql = "SELECT SN FROM dbo.All_Batteries WHERE Status = 'IN-HOUSE' AND BatteryName IN (SELECT BatteryName FROM dbo.Battery WHERE Complete = 'YES')";
 $stmt = sqlsrv_query($conn, $sql);
 $snOptions = [];
 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {

@@ -272,10 +272,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serialNumber = $formData['productSerialNumber'];
     $customerName = $formData['customerName'];
     $issueDetails = $formData['issueDescription'] ?? '';
-    $selectedBattery = $formData['selectedBattery'];
+    $selectedBattery = $formData['batteryName'];
     $status = 'INBOUND';
     // SQL Insert Statement
-    $sql = "INSERT INTO dbo.Repairs (SerialNumber, Requester, Details, Status) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO dbo.Repairs (SerialNumber, Requester, Details, Status) VALUES (?, ?, ?, ?)";
     $params = [$serialNumber, $customerName, $issueDetails, $status];
 
     // Creates the sql statement, establishes the connection, declares the statement and adds the values wishing to be inserted
@@ -287,10 +287,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'INBOUND' WHERE SN = ?";
         $SNparams = [$serialNumber];
     } else {
-        $sqlAll = "INSERT INTO dbo.All_Batteries (SN, BatteryType, Status) VALUES (?, ?, ?)";
+        $sqlAll = "INSERT INTO dbo.All_Batteries (SN, BatteryName, Status) VALUES (?, ?, ?)";
         $SNparams = [$serialNumber, $selectedBattery, $status];
     }
-    sqlsrv_query($conn, $sqlAll,$SNparams);
+    sqlsrv_query($conn, $sqlAll, $SNparams);
     // throws an error if $stmt does not execute correctly and prints the error
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
@@ -302,10 +302,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // After successful insert into Repairs table
     $logSql = "INSERT INTO dbo.InventoryLog 
-        (ActionType, TableAffected, RepairSerialNumber, RepairRequester, RepairDetails, RepairStatus) 
+        (ActionType, TableAffected, ProductNumber, RepairRequester, Description, Status) 
         VALUES (?, ?, ?, ?, ?, ?)";
     $logParams = [
-        'add', 'Repairs', $serialNumber, $customerName, $issueDetails, $status
+        'Add', 'Repairs', $serialNumber, $customerName, $issueDetails, $status
     ];
     sqlsrv_query($conn, $logSql, $logParams);
 

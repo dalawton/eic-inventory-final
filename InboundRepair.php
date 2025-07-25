@@ -99,8 +99,7 @@ if ($stmt === false) {
                             <select name="batteryName" class="form-control" id="batteryName" required>
                                 <option value="">--Select Battery Type--</option>
                                 <?php foreach ($batteryOptions as $Name) : ?>
-                                <option value="<?php echo htmlspecialchars($Name) ?>" 
-                                    <?php echo $selectedBattery === $Name ? 'selected' : '' ?>> 
+                                <option value="<?php echo htmlspecialchars($Name) ?>"> 
                                     <?php echo htmlspecialchars($Name) ?>
                                 </option>
                                 <?php endforeach; ?>
