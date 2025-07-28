@@ -160,7 +160,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
                             <th>Description</th>
                             <th>Parts per Battery</th>
                             <th>Total Parts Needed</th>
-                            <th>Current Inventory</th>
+                            <th>Current Inventory with Buffer</th>
                             <th>Stock Status</th>
                         </tr>
                     </thead>
@@ -266,7 +266,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
             
             currentParts.forEach(part => {
                 const totalNeeded = part.PartsNeeded * quantity;
-                const hasEnough = part.InventoryAmount >= totalNeeded;
+                const inventoryWithBuffer = Math.round(part.InventoryAmount * 1.2);
+                const hasEnough = inventoryWithBuffer >= totalNeeded;
                 
                 const row = document.createElement('tr');
                 row.className = hasEnough ? 'sufficient-stock' : 'insufficient-stock';
@@ -276,7 +277,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
                     <td>${escapeHtml(part.Description)}</td>
                     <td>${part.PartsNeeded}</td>
                     <td>${totalNeeded}</td>
-                    <td>${part.InventoryAmount}</td>
+                    <td>${inventoryWithBuffer}</td>
                     <td>${hasEnough ? 'Sufficient' : 'Insufficient'}</td>
                 `;
                 

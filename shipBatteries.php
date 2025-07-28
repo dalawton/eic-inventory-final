@@ -70,6 +70,10 @@ if ($conn === false) {
     </head>
     <body>
         <div class="main-container">
+            <div class="header">
+                <h1>Mark Completed Batteries Shipped</h1>
+                <p>Results shown are in-house complete batteries</p>
+            </div>
             <div class="form-content">
                 <div class="form-section">
                     <form method="get" action="markBatteryShipped.php">

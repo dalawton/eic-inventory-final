@@ -604,7 +604,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requestor = $formData['requestorName'];
     $contractNumber = $formData['otherContractNumber'];
     $otherName = $formData['otherName'];
-    $supplierStreetAddress = $formData['streetAddress'];
+    $supplierStreetAddress = $formData['supplierStreetAddress'];
     $supplierCity = $formData['supplierCity'];
     $supplierState = $formData['supplierState'];
     $supplierZip = $formData['supplierZip'];
@@ -623,13 +623,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Add new contract number if needed
-    if (!empty($contractNumber)) {
-        $sql = "INSERT INTO dbo.contractNumbers (contractNumber) VALUES (?)";
-        $params = [$contractNumber];
-        $stmt = sqlsrv_query($conn, $sql, $params);
-        if ($stmt === false) {
-            error_log("Contract insert failed: " . print_r(sqlsrv_errors(), true));
-            die("Error inserting contract: " . print_r(sqlsrv_errors(), true));
+    if (!empty($contractNumber && $contractNumber === 'other')) {
+        if (!empty($formData['otherContractNumber'])){
+            $sql = "INSERT INTO dbo.contractNumbers (contractNumber) VALUES (?)";
+            $params = [$contractNumber];
+            $stmt = sqlsrv_query($conn, $sql, $params);
+            if ($stmt === false) {
+                error_log("Contract insert failed: " . print_r(sqlsrv_errors(), true));
+                die("Error inserting contract: " . print_r(sqlsrv_errors(), true));
+            }
         }
     }
 

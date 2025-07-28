@@ -493,7 +493,7 @@ if ($contractStmt === false) {
             
             const combinedData = new FormData(supplierForm);
             const commentsForm = document.getElementById('comments');
-            const commentsInput = commentsForm.querySelector('input[type="text"]'); // or whatever selector matches your input
+            const commentsInput = commentsForm.querySelector('input[type="text"]');
             combinedData.append('comments', commentsInput.value);
             // Collect all rows from the table with proper price parsing
             const products = [];
@@ -520,24 +520,28 @@ if ($contractStmt === false) {
 
             // Debug: Log products to console
             console.log('Products being sent:', products);
+            if (empty(products)){
+                console.error('Empty Purchase Order! Please add products');
+                alert("Error: Empty Purchase Order");
+            } else {
+                // Add products as a JSON string
+                combinedData.append("productsJSON", JSON.stringify(products));
 
-            // Add products as a JSON string
-            combinedData.append("productsJSON", JSON.stringify(products));
-
-            // SEND the data to submitPO.php
-            fetch('submitPO.php', {
-                method: 'POST',
-                body: combinedData
-            })
-            .then(response => response.text())
-            .then(data => {
-                console.log('Server response:', data);
-                alert(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Error submitting PO: " + error);
-            });
+                // SEND the data to submitPO.php
+                fetch('submitPO.php', {
+                    method: 'POST',
+                    body: combinedData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Server response:', data);
+                    alert(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Error submitting PO: " + error);
+                });
+            }
         });
 
         // Remove product row

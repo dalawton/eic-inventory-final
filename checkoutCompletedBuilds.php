@@ -137,7 +137,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="styleCheckout.css">
-        <title>Submit Completed Battery</title>
+        <title>Log Battery Changes</title>
         <script 
             src="https://code.jquery.com/jquery-3.6.0.min.js">
         </script>
@@ -227,9 +227,9 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
     <body>
         <div class="main-container">
             <div class="header">
-                <h1>Submit Completed Battery</h1>
-                <p>Select the type of completed battery and how many of each part used</p>
-                <p>Submit the form along with new battery's serial number to remove parts from inventory</p>
+                <h1>Submit Battery Steps</h1>
+                <p>Select model of the battery completed:</p>
+                <p>Update the amount of parts used and input serial number to add battery into database.</p>
             </div>
             <div class="form-content">
                 <form class="form-section" method="GET" id="batterySelectForm">
@@ -265,7 +265,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                                 <?php echo htmlspecialchars($selectedBattery) ?> </h2>
                         </div>
                         <div class="desc-info">
-                            <p>Update the amount used of each part for the completed battery</p>
+                            <p>Update the amount used of each part for the battery</p>
                             <p>If a certain listed part is not used, change amount to 0</p>
                             <p>For subpack/module/cellpack parts, select the specific serial numbers being used</p>
                             <p>Add not listed parts at the bottom if used</p>
@@ -356,6 +356,12 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                         <div class="form-group">
                             <label for="newBatteryName">New Battery Name</label>
                             <input type="text" id="newBatteryName" name="newBatteryName" class="form-control">
+                            <br>
+                            <select name="complete" id="complete" class="form-control">
+                                <option value="">-- Is this a full battery? --</option>
+                                <option value="Yes">Yes - Full Battery</option>
+                                <option value="No">No - Part of a Full Battery</option>
+                            </select>
                         </div>
                         <div class="product-table-container">
                             <div class="table-header">

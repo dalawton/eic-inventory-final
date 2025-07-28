@@ -56,7 +56,7 @@ if ($conn === false) {
 
 // Get POST data
 $id = $_POST['updateProductNumber'];
-$newValue = $_POST['updateQuantity'];
+$newValue = $_POST['updateQuantity'] ?? '';
 $newDetails = $_POST['updateDetails'] ?? '';
 
 if (!empty($newValue)) {
@@ -78,8 +78,8 @@ if ($stmt === false) {
 } else {
     echo "Record updated successfully.";
     // Log the action
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Quantity, Status) VALUES (?, ?, ?, ?, ?)";
-    $logParams = ['Update', $id, $newDetails, $newValue, 'COMPLETE'];
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, TableAffected, ProductNumber, Description, Quantity, Status) VALUES (?, ?, ?, ?, ?, ?)";
+    $logParams = ['Update', 'Inventory', $id, $newDetails, $newValue, 'COMPLETE'];
     sqlsrv_query($conn, $logSql, $logParams);
 }
 // Free the statement and close the connection

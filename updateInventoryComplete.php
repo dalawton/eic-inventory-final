@@ -194,8 +194,8 @@ try {
             $insertParts = sqlsrv_query($conn, "INSERT INTO dbo.PartsForBatteries (BatteryName, PN, Amount) VALUES (?, ?, ?)", [$selectedBattery, $pn, $amt]);
         }
     }
-    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, ProductNumber, Description, Status) VALUES (?, ?, ?, ?)";
-    $logParams = ['Create Battery', $serialNumber, $selectedBattery, 'IN-HOUSE'];
+    $logSql = "INSERT INTO dbo.InventoryLog (ActionType, TableAffected, ProductNumber, Description, Status) VALUES (?, ?, ?, ?, ?)";
+    $logParams = ['Add', 'Batteries', $serialNumber, $selectedBattery, 'IN-HOUSE'];
     sqlsrv_query($conn, $logSql, $logParams);
 
     // Commit transaction
