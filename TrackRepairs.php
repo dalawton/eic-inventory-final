@@ -26,17 +26,14 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -45,10 +42,8 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -65,7 +60,6 @@ $stmt = sqlsrv_query($conn, $sql);
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="styleIssueReport.css">
         <style>
-            /* Additional responsive table styles */
             .product-table-container {
                 overflow-x: auto;
                 margin: 30px 0;
@@ -100,7 +94,6 @@ $stmt = sqlsrv_query($conn, $sql);
                 z-index: 10;
             }
             
-            /* Specific column widths */
             .product-table th:nth-child(1),
             .product-table td:nth-child(1) {
                 max-width: 100px;
@@ -201,7 +194,6 @@ $stmt = sqlsrv_query($conn, $sql);
                     <table class="product-table">
                         <thead>
                             <?php
-                            // Fetch the first row to get column names
                             $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
                             if ($row) {
                                 echo "<tr>";
@@ -225,7 +217,6 @@ $stmt = sqlsrv_query($conn, $sql);
                         </thead>
                         <tbody>
                                 <?php
-                                // Output the first row
                                 echo "<tr>";
                                 foreach ($row as $value) {
                                     $statusClass = "status-other";
@@ -251,7 +242,6 @@ $stmt = sqlsrv_query($conn, $sql);
                                 }
                                 echo "</tr>";
 
-                                // Output the rest of the rows
                                 while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                                     echo "<tr>";
                                     foreach ($row as $value) {
@@ -286,7 +276,6 @@ $stmt = sqlsrv_query($conn, $sql);
                     </table>
                 </div>
             </div>
-            <!-- Navigation -->
             <div class="navigation">
                 <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                     Return to Front Page

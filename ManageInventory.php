@@ -27,17 +27,14 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -46,15 +43,12 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Get search input if present
 $search = '';
 if (isset($_GET['productNumber']) && $_GET['productNumber'] !== '') {
     $search = $_GET['productNumber'];
@@ -110,7 +104,7 @@ if ($stmt === false) {
                 <h2 class="section-title collapsible">Update Part in Inventory:</h2>
                 <div class="collapsible-content" style="display:none;">
                     <div class="form-grid">
-                        <form id="updateProductForm" action="updateInventory.php" class="form-grid" method="POST"> <!-- redirects to updateInventory.php on click of submit button -->
+                        <form id="updateProductForm" action="updateInventory.php" class="form-grid" method="POST">
                             <label for="updateProductNumber">Product Number:</label><br>
                             <input type="text" id="updateProductNumber" class="form-control" name="updateProductNumber" placeholder='Ex. A32-31241' required>
                             <label for="updateQuantity">New Quantity:</label><br>
@@ -131,7 +125,7 @@ if ($stmt === false) {
                 <h2 class="section-title collapsible">Delete Part From Inventory:</h2>
                 <div class="collapsible-content" style="display:none;">
                     <div class="form-grid">
-                        <form id="deleteProductForm" action="deleteInventory.php" class="form-grid" method="POST"> <!-- redirects to deleteInventory.php on click of submit button -->
+                        <form id="deleteProductForm" action="deleteInventory.php" class="form-grid" method="POST">
                             <label for="deleteProductNumber">Product Number:</label><br>
                             <input type="text" id="deleteProductNumber" class="form-control" name="deleteProductNumber" placeholder='Ex. A32-31241' required>
                             <br>
@@ -164,19 +158,17 @@ if ($stmt === false) {
                                 <th>Details</th>
                             </tr>
                         </div>
-                        <!-- Defines the table of inventory and its column titles from the connection to server -->
                         <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($row['PN']) ?></td>
                                 <td><?php echo htmlspecialchars($row['Amount']) ?></td>
-                                <td><?php echo htmlspecialchars($row['Details'] ?? '') ?></td> <!-- The "?? '' "  allows null values to be displayed correctly -->
+                                <td><?php echo htmlspecialchars($row['Details'] ?? '') ?></td>
                             </tr>
                         <?php endwhile; ?>
                     </table>
                 </div>
             </div>
         </div>
-        <!-- Navigation -->
         <div class="navigation">
             <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                 Return to Front Page

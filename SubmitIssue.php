@@ -30,17 +30,14 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-// Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -49,10 +46,8 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -60,9 +55,6 @@ if ($conn === false) {
 $mail = new PHPMailer(true);
 
 try {
-    // Enable debug output for testing (remove in production)
-    // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-    // $mail->Debugoutput = 'html';
     if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
         $file_name = $_FILES['attachment']['name'];
         $file_tmp = $_FILES['attachment']['tmp_name'];
@@ -70,7 +62,6 @@ try {
         $file_name = null;
         $file_tmp = null;
     }
-    // Server settings
     $mail->isSMTP();
     $mail->Host = 'smtp.office365.com';
     $mail->SMTPAuth = true;
@@ -79,7 +70,6 @@ try {
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
-    // Prevent hanging
     $mail->Timeout = 30;
     $mail->SMTPOptions = array(
         'ssl' => array(
@@ -89,24 +79,19 @@ try {
         )
     );
 
-    // Recipients
     $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
     $mail->addAddress($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
 
-    // Add reply-to if form data exists
     if (isset($_POST['email']) && !empty($_POST['email'])) {
         $mail->addReplyTo($_POST['email'], $_POST['name'] ?? '');
     }
 
-    // Content
     $mail->isHTML(true);
 
-    // Build subject
     $requestType = $_POST['typeRequest'] ?? 'General Request';
     $submitterName = $_POST['name'] ?? 'Anonymous';
     $mail->Subject = "[$requestType] - $submitterName";
 
-    // Build email body
     $body = "<html><body>";
     $body .= "<h2>New Issue Submission</h2>";
     $body .= "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse: collapse;'>";
@@ -126,7 +111,6 @@ try {
         $mail->addAttachment($file_tmp, $file_name);
     }
 
-    // Plain text version
     $altBody = "New Issue Submission\n\n";
     $altBody .= "Type: " . ($_POST['typeRequest'] ?? 'Not specified') . "\n";
     $altBody .= "Name: " . ($_POST['name'] ?? 'Not provided') . "\n";
@@ -136,10 +120,8 @@ try {
 
     $mail->AltBody = $altBody;
 
-    // Send the email
     $mail->send();
 
-    // Success response
     echo "<!DOCTYPE html>";
     echo "<html><head><title>Success</title></head><body>";
     echo "<h2>✅ Issue submitted successfully!</h2>";
@@ -147,23 +129,14 @@ try {
     echo "<p><a href='javascript:history.back()'>← Go Back</a></p>";
     echo "</body></html>";
 } catch (Exception $e) {
-    // Log the error
     error_log("Mail error: " . $e->getMessage());
 
-    // User-friendly error response
     echo "<!DOCTYPE html>";
     echo "<html><head><title>Error</title></head><body>";
     echo "<h2>❌ Failed to submit issue</h2>";
     echo "<p>We're sorry, but there was a problem submitting your request.</p>";
     echo "<p>Please try again later or contact support directly</p>";
     echo "<p><a href='javascript:history.back()'>← Go Back</a></p>";
-
-    // Show detailed error only in development
-    if (isset($_ENV['APP_DEBUG']) && $_ENV['APP_DEBUG'] === 'true') {
-        echo "<details><summary>Technical Details</summary>";
-        echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
-        echo "</details>";
-    }
 
     echo "</body></html>";
 }

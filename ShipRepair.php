@@ -26,17 +26,14 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -45,15 +42,12 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Get all non-shipped Repairs
 $sql = "SELECT SerialNumber FROM dbo.Repairs WHERE Status != 'SHIPPED'";
 $stmt = sqlsrv_query($conn, $sql);
 if ($stmt === false) {
@@ -81,7 +75,7 @@ if ($stmt === false) {
             <div class="form-content">
                 <div class="form-group">
                     <label class="section-title" for="serialNumber">Select Repair:</label>
-                    <select name="serialNumber" class="form-control" id="serialNumber"> <!-- Dropdown for unreceived Repairs -->
+                    <select name="serialNumber" class="form-control" id="serialNumber">
                         <option value="">--Select--</option>
                         <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
                         <option value="<?php echo htmlspecialchars($row['SerialNumber']) ?>">
@@ -97,7 +91,6 @@ if ($stmt === false) {
                 </div>
                 <div class="form-section" id="repairFields" style="display:none;">
                     <div class="form-grid">
-                        <!-- Form to ship fixed repairs -->
                         <form id="shipFixedRepairsForm" action="markRepairShipped.php" method="POST">
                             <div class="form-group">
                                 <input type="hidden" id="hiddenSerialNumber" name="serialNumber" value="">
@@ -158,13 +151,10 @@ if ($stmt === false) {
                     repairInfo.hide();
                     repairDetails.html('');
                     otherFields.hide();
-                    // Clear the hidden field
                     $('#hiddenSerialNumber').val('');
                 } else if (val) {
-                    // Set the hidden field value
                     $('#hiddenSerialNumber').val(val);
                     
-                    // Fetch and show repair info
                     $.get('getRepairInfo.php', { serialNumber: val }, function(data) {
                         var info = '';
                         try {
@@ -185,7 +175,6 @@ if ($stmt === false) {
                         }
                     });
                 } else {
-                    // No selection - hide everything and clear hidden field
                     repairInfo.hide();
                     otherFields.hide();
                     $('#hiddenSerialNumber').val('');
@@ -210,7 +199,6 @@ if ($stmt === false) {
                         <td><input type="number" class="form-control" name="amountUsed[]" value="${amountUsed}" min="0" readonly></td>
                     </tr>
                 `);
-                // Clear the input fields
                 $('#newPartNumber').val('');
                 $('#newAmountUsed').val('');
             }

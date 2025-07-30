@@ -92,7 +92,6 @@ if ($stmt === false) {
                 </table>
             </div>
         </div>
-        <!-- Navigation -->
         <div class="navigation">
             <br><br>
             <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">Return to Front Page</button>

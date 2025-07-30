@@ -47,7 +47,6 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Vendor search logic
 $search = $_GET['vendor_search'] ?? '';
 $params = [];
 $where = '';
@@ -84,7 +83,6 @@ if ($stmt === false) {
                 <div class="form-section">
                     <h2 class="section-title">Vendor Information</h2>
 
-                    <!-- Vendor Search and Dropdown -->
                     <div class="form-group">
                         <label for="vendorName">Select Vendor:</label>
                         <select name="vendorName" id="vendorName" class="form-control">
@@ -106,23 +104,19 @@ if ($stmt === false) {
                                     $('#vendorID').val(val);
 
                                     if (val && val !== 'not_listed') {
-                                        // Fetch and show vendor info
                                         $.get('getVendorInfo.php', { vendorID: val }, function(data) {
                                             var vendor = (typeof data === 'string') ? JSON.parse(data) : data;
                                             if (vendor && !vendor.error) {
-                                                // Set placeholders in the form fields
                                                 $('#contactNameFix').attr('placeholder', vendor.ContactName ?? '');
                                                 $('#contactEmailFix').attr('placeholder', vendor.ContactEmail ?? '');
                                                 $('#vendorPhoneFix').attr('placeholder', vendor.Telephone ?? '');
                                                 $('#vendorAddressFix').attr('placeholder', vendor.AddressLine1 ?? '');
                                                 $('#vendorCitySTZIPFix').attr('placeholder', vendor.CitySTZIP ?? '');
                                             } else {
-                                                // Clear placeholders if no vendor found
                                                 $('#vendorNameFix, #contactNameFix, #contactEmailFix, #vendorPhoneFix, #vendorAddressFix, #vendorCitySTZIPFix').attr('placeholder', '');
                                             }
                                         });
                                     } else {
-                                        // Clear placeholders if "not listed" or empty
                                         $('#vendorNameFix, #contactNameFix, #contactEmailFix, #vendorPhoneFix, #vendorAddressFix, #vendorCitySTZIPFix').attr('placeholder', '');
                                     }
                                 });
@@ -165,7 +159,6 @@ if ($stmt === false) {
                     </div>
                 </div>
             </div>
-            <!-- Navigation -->
             <div class="navigation">
                 <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                     Return to Front Page

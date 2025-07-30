@@ -60,19 +60,11 @@ function getNextPONumber($conn)
     $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
     $maxPO = $row['maxPO'];
 
-    // If no POs exist or max is less than 60266, start at 60266
-    if ($maxPO === null || $maxPO < 60266) {
-        return '60266';
-    }
-
-    // Otherwise, increment by 1
     return strval($maxPO + 1);
 }
 
-// Get the next PO number
 $nextPONumber = getNextPONumber($conn);
 
-// Vendor search logic
 $search = $_GET['vendor_search'] ?? '';
 $params = [];
 $where = '';
@@ -87,7 +79,6 @@ if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Fetch contract numbers
 $contractSql = "SELECT contractNumber FROM contractNumbers ORDER BY contractNumber";
 $contractStmt = sqlsrv_query($conn, $contractSql);
 if ($contractStmt === false) {
@@ -117,7 +108,6 @@ if ($contractStmt === false) {
 
         <div class="form-content">
             <form id="supplierInfo" method="POST" action="">
-                <!-- Basic Information Section -->
                 <div class="form-section">
                     <h2 class="section-title">Basic Information</h2>
                     
@@ -158,7 +148,6 @@ if ($contractStmt === false) {
                     </div>
                 </div>
 
-                <!-- Vendor Information Section -->
                 <div class="form-section">
                     <h2 class="section-title">Vendor Information</h2>
                     
@@ -229,7 +218,6 @@ if ($contractStmt === false) {
                     </div>
                 </div>
 
-                <!-- Order Details Section -->
                 <div class="form-section">
                     <h2 class="section-title">Order Details</h2>
                     
@@ -292,7 +280,6 @@ if ($contractStmt === false) {
                 </div>
             </form>
 
-            <!-- Product Table Section -->
             <div class="product-table-container">
                 <div class="table-header">
                     <h3>Products Requested</h3>
@@ -310,7 +297,6 @@ if ($contractStmt === false) {
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Products will be added here dynamically -->
                     </tbody>
                 </table>
 
@@ -351,7 +337,6 @@ if ($contractStmt === false) {
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="action-buttons">
                 <button type="button" id="submitAllButton" class="btn btn-success">
                     Send Purchase Order
@@ -359,7 +344,6 @@ if ($contractStmt === false) {
             </div>
         </div>
 
-        <!-- Navigation -->
         <div class="navigation">
             <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                 Return to Front Page
@@ -388,7 +372,6 @@ if ($contractStmt === false) {
                 vendorDetails.html('');
             } else if (val) {
                 otherFields.hide();
-                // Fetch and show vendor info using VendorName
                 $.get('getVendorInfo.php', { vendorName: val }, function(data) {
                     var info = '';
                     try {
@@ -418,7 +401,6 @@ if ($contractStmt === false) {
             }
         });
 
-        // On page load, ensure correct fields are shown/hidden
         var initialVal = $('#vendorName').val();
         if (initialVal === 'not_listed') {
             $('#otherVendorFields').show();
@@ -434,7 +416,6 @@ if ($contractStmt === false) {
         }
     });
 
-        // Add product to table
         $('#table').on('submit', function(e) {
             e.preventDefault();
 
@@ -470,7 +451,6 @@ if ($contractStmt === false) {
                 </td>
             `;
 
-            // Add hover effect to new row
             $(newRow).hover(
                 function() { $(this).find('td').css('background', '#f8f9ff'); },
                 function() { $(this).find('td').css('background', ''); }
@@ -480,23 +460,18 @@ if ($contractStmt === false) {
         });
         });
 
-        // Submit form
         $('#submitAllButton').on('click', function() {
-            // Collect form data from both forms
             const supplierForm = document.getElementById('supplierInfo');
             const tableRows = document.querySelectorAll("#productTableSubmitted tbody tr");
             
             const combinedData = new FormData(supplierForm);
-            // Collect all rows from the table with proper price parsing
             const products = [];
             tableRows.forEach(row => {
                 const cells = row.querySelectorAll("td");
                 if (cells.length === 6) {
-                    // Extract and clean price values
                     const unitPriceText = cells[2].textContent.trim();
                     const totalText = cells[4].textContent.trim();
                     
-                    // Remove $ and parse as float
                     const unitPrice = parseFloat(unitPriceText.replace(/[$,]/g, '')) || 0;
                     const total = parseFloat(totalText.replace(/[$,]/g, '')) || 0;
                     
@@ -510,16 +485,13 @@ if ($contractStmt === false) {
                 }
             });
 
-            // Debug: Log products to console
             console.log('Products being sent:', products);
             if (products.length === 0) {
                 console.error('Empty Purchase Order! Please add products');
                 alert("Error: Empty Purchase Order");
             } else {
-                // Add products as a JSON string
                 combinedData.append("productsJSON", JSON.stringify(products));
 
-                // SEND the data to submitPO.php
                 fetch('submitPO.php', {
                     method: 'POST',
                     body: combinedData
@@ -536,7 +508,6 @@ if ($contractStmt === false) {
             }
         });
 
-        // Remove product row
         window.removeProduct = function(button) {
             const row = button.closest('tr');
             if (row) {
@@ -544,7 +515,6 @@ if ($contractStmt === false) {
             }
         }
 
-        // Event delegation for edit and remove buttons
         $('#productTableSubmitted tbody').on('click', '.btn-remove', function() {
             $(this).closest('tr').remove();
         });
@@ -552,35 +522,29 @@ if ($contractStmt === false) {
         $('#productTableSubmitted tbody').on('click', '.btn-edit', function() {
             const $row = $(this).closest('tr');
             if ($(this).text() === "Edit") {
-                // Store original values for cancel
                 $row.data('original', {
                     productNumber: $row.find('td').eq(0).text(),
                     quantity: $row.find('td').eq(1).text(),
                     unitPrice: $row.find('td').eq(2).text().replace(/^\$/, ''),
                     description: $row.find('td').eq(3).text()
                 });
-                // Make cells editable except total and actions
                 $row.find('td').each(function(i) {
                     const val = $(this).text().replace(/^\$/, '');
                     if (i < 4) {
-                        // Description column: fill the cell
                         $(this).html(`<input type="text" class="form-control" style="width:100%;" value="${val}">`);
                     }
                 });
-                // Change Edit to Save and add Cancel
                 $(this).text("Save");
                 if ($row.find('.btn-cancel').length === 0) {
                     $(this).after('<button type="button" class="btn btn-warning btn-cancel" style="margin-left:5px;">Cancel</button>');
                 }
             } else {
-                // Save edited values
                 const inputs = $row.find('input');
                 const productNumber = $(inputs[0]).val();
                 const quantity = parseFloat($(inputs[1]).val());
                 const unitPrice = parseFloat($(inputs[2]).val());
                 let description = $(inputs[3]).val().trim();
 
-                // Fetch description from inventory if user did not override
                 if (description) {
                     $.get('getDescription.php', { productNumber: productNumber }, function(data) {
                         let dbDescription = '';
@@ -600,9 +564,7 @@ if ($contractStmt === false) {
             }
         });
 
-        // Also update the updateRow function to ensure proper price formatting:
         function updateRow($row, productNumber, quantity, unitPrice, description) {
-            // Ensure unitPrice is a number
             const parsedUnitPrice = parseFloat(unitPrice) || 0;
             const parsedQuantity = parseInt(quantity) || 0;
             const total = parsedUnitPrice * parsedQuantity;
@@ -620,7 +582,6 @@ if ($contractStmt === false) {
             `);
         }
 
-        // Cancel button logic
         $('#productTableSubmitted tbody').on('click', '.btn-cancel', function() {
             const $row = $(this).closest('tr');
             const orig = $row.data('original');

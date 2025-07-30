@@ -29,17 +29,14 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 use Dotenv\Dotenv;
 
-// Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -48,10 +45,8 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -65,21 +60,18 @@ if ($conn === false) {
  */
 function sendRepairEmail($formData)
 {
-    // Create a new PHPMailer instance
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
 
     try {
-        // Server settings
         $mail->isSMTP();
         $mail->Host = 'smtp.office365.com';
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['SMTP_EMAIL'];
-        $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
+        $mail->Password = $_ENV['SMTP_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        // Prevent hanging
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
             'ssl' => array(
@@ -89,24 +81,19 @@ function sendRepairEmail($formData)
             )
         );
 
-        // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
         
-        // Content
         $mail->isHTML(true);
         $mail->Subject = 'Repair - Inbound Notice -- Serial Number #' . ($formData['productSerialNumber'] ?? 'N/A');
 
-        // Generate email body
         $emailBody = generateRepairEmailBody($formData);
         $mail->Body = $emailBody;
 
-        // Plain text version
         $mail->AltBody = generatePlainTextVersion($formData);
 
-        // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Email sent successfully'];
     } catch (Exception $e) {
@@ -221,7 +208,6 @@ function generateRepairEmailBody($formData)
             <p><strong>Date Submitted:</strong> ' . date('Y-m-d') . '</p>
         </div>';
 
-    // Information Section
     $html .= '
     <div class="section">
         <h3>Repair Information</h3>
@@ -255,7 +241,6 @@ function generatePlainTextVersion($formData)
     $text .= "Serial Number: " . ($formData['productSerialNumber'] ?? 'N/A') . "\n";
     $text .= "Date Submitted: " . date('Y-m-d') . "\n\n";
 
-    // Repair Information
     $text .= "REPAIR INFORMATION:\n";
     $text .= "Customer Name: " . ($formData['customerName'] ?? 'N/A') . "\n";
 
@@ -268,20 +253,17 @@ function generatePlainTextVersion($formData)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
-    // get the information that was submitted from the form
     $serialNumber = $formData['productSerialNumber'];
     $customerName = $formData['customerName'];
     $issueDetails = $formData['issueDescription'] ?? '';
     $selectedBattery = $formData['batteryName'];
     $status = 'INBOUND';
-    // SQL Insert Statement
+
     $sql = "INSERT INTO dbo.Repairs (SerialNumber, Requester, Details, Status) VALUES (?, ?, ?, ?)";
     $params = [$serialNumber, $customerName, $issueDetails, $status];
 
-    // Creates the sql statement, establishes the connection, declares the statement and adds the values wishing to be inserted
     $stmt = sqlsrv_query($conn, $sql, $params);
 
-    // Check if SN is in All_Batteries Database
     $check = sqlsrv_query($conn, "SELECT Status from dbo.All_Batteries WHERE SN = ?", [$serialNumber]);
     if ($row = sqlsrv_fetch_array($check, SQLSRV_FETCH_ASSOC)){
         $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'INBOUND' WHERE SN = ?";
@@ -291,16 +273,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $SNparams = [$serialNumber, $selectedBattery, $status];
     }
     sqlsrv_query($conn, $sqlAll, $SNparams);
-    // throws an error if $stmt does not execute correctly and prints the error
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
 
-        // if the $stmt statement executes correctly, a confirmation sentance will be printed
     } else {
         echo "Record added successfully. \n";
     }
 
-    // After successful insert into Repairs table
     $logSql = "INSERT INTO dbo.InventoryLog 
         (ActionType, TableAffected, ProductNumber, RepairRequester, Description, Status) 
         VALUES (?, ?, ?, ?, ?, ?)";
@@ -319,6 +298,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 
-// frees up the $stmt variable and closes the connection to allow for additional statements and security for the server
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);

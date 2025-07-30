@@ -27,17 +27,14 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -46,21 +43,17 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Get submitted data
 $selectedBattery = $_POST['selectedBattery'] ?? null;
 $amountUsed = $_POST['amount_Used'] ?? [];
 $serialNumber = $_POST['serialNumber'] ?? null;
 $selectedComponentSNs = $_POST['component_sns'] ?? [];
 
-// Process selected component serial numbers
 $componentSNs = [];
 if (!empty($selectedComponentSNs) && is_array($selectedComponentSNs)) {
     $componentSNs = array_filter($selectedComponentSNs);
@@ -68,16 +61,13 @@ if (!empty($selectedComponentSNs) && is_array($selectedComponentSNs)) {
     $componentSNs = array_filter(explode(',', $selectedComponentSNs));
 }
 
-// Begin transaction for atomicity
 sqlsrv_begin_transaction($conn);
 
 try {
-    // Validate serial number format (optional - adjust regex as needed for your format)
     if ($serialNumber && !preg_match('/^[A-Za-z0-9\-_]+$/', $serialNumber)) {
         throw new Exception("Invalid serial number format. Only letters, numbers, hyphens, and underscores are allowed.");
     }
     
-    // Check if serial number already exists
     if ($serialNumber) {
         $checkSNStmt = sqlsrv_query($conn, "SELECT COUNT(*) as count FROM dbo.All_Batteries WHERE SN = ?", [$serialNumber]);
         $checkSNRow = sqlsrv_fetch_array($checkSNStmt, SQLSRV_FETCH_ASSOC);
@@ -87,7 +77,6 @@ try {
         }
     }
 
-    // Add Serial Number into Battery Database
     if ($serialNumber) {
         $sqlBattery = "INSERT INTO dbo.All_Batteries (SN, BatteryName, Status) VALUES (?,?,?)";
         $stmtBattery = sqlsrv_query($conn, $sqlBattery, [$serialNumber, $selectedBattery, "IN-HOUSE"]);
@@ -127,7 +116,6 @@ try {
     }
 
     if ($selectedBattery) {
-        // Get all parts for this battery
         $sql = "SELECT * FROM dbo.PartsForBatteries WHERE BatteryName = ? AND PN NOT IN (SELECT BatteryName from dbo.Battery WHERE Complete = 'No')";
         $stmt = sqlsrv_query($conn, $sql, [$selectedBattery]);
         
@@ -140,7 +128,6 @@ try {
             $pn = $item['PN'];
             $currentAmountUsed = isset($amountUsed[$index]) ? (int)$amountUsed[$index] : 0;
 
-            // Update inventory
             $invCheck = sqlsrv_query($conn, "SELECT Amount from dbo.Inventory WHERE PN = ?", [$pn]);
             if ($row = sqlsrv_fetch_array($invCheck, SQLSRV_FETCH_ASSOC)) {
                 $newQty = $row['Amount'] - $currentAmountUsed;
@@ -150,7 +137,6 @@ try {
                     throw new Exception("Failed to update inventory for PN $pn: " . print_r(sqlsrv_errors(), true));
                 }
             } else {
-                // If part doesn't exist in inventory, create it with negative amount
                 $insertStmt = sqlsrv_query($conn, "INSERT INTO dbo.Inventory (PN, Amount) VALUES (?, ?)", [$pn, -$currentAmountUsed]);
                 
                 if ($insertStmt === false) {
@@ -161,7 +147,6 @@ try {
         }
     }
 
-    // Handle extra parts that were added
     $extraPartNumbers = $_POST['partNumber'] ?? [];
     $extraDescriptions = $_POST['description'] ?? [];
     $extraAmounts = $_POST['amountUsed'] ?? [];
@@ -172,7 +157,6 @@ try {
         $amt = (int)($extraAmounts[$i] ?? 0);
         
         if (!empty($pn) && $amt > 0) {
-            // Update inventory for extra parts
             $invCheck = sqlsrv_query($conn, "SELECT Amount from dbo.Inventory WHERE PN = ?", [$pn]);
             if ($row = sqlsrv_fetch_array($invCheck, SQLSRV_FETCH_ASSOC)) {
                 $newQty = $row['Amount'] - $amt;
@@ -182,7 +166,6 @@ try {
                     throw new Exception("Failed to update inventory for extra part $pn: " . print_r(sqlsrv_errors(), true));
                 }
             } else {
-                // If part doesn't exist in inventory, create it with description
                 $insertStmt = sqlsrv_query($conn, "INSERT INTO dbo.Inventory (PN, Amount, Details) VALUES (?, ?, ?)", [$pn, -$amt, $desc]);
                 
                 if ($insertStmt === false) {
@@ -197,7 +180,6 @@ try {
     $logParams = ['Add', 'Batteries', $serialNumber, $selectedBattery, 'IN-HOUSE'];
     sqlsrv_query($conn, $logSql, $logParams);
 
-    // Commit transaction
     sqlsrv_commit($conn);
     
     $message = "Parts processed and inventory updated successfully!";
@@ -206,7 +188,6 @@ try {
     }
     
 } catch (Exception $e) {
-    // Rollback transaction on error
     sqlsrv_rollback($conn);
     $message = "Error processing request: " . $e->getMessage();
 }

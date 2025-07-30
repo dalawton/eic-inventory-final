@@ -26,11 +26,9 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
@@ -50,17 +48,14 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Get all batteries for dropdown
 $batteriesQuery = "SELECT BatteryName FROM dbo.Battery";
 $batteriesStmt = sqlsrv_query($conn, $batteriesQuery);
 if ($batteriesStmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
-// Handle AJAX request for battery parts
 if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
     $batteryName = $_POST['batteryName'] ?? 0;
     
-    // Debug: Log the request
     error_log("Battery Name requested: " . $batteryName);
     
     $sql = "SELECT 
@@ -207,14 +202,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
                 body: formData
             })
             .then(response => {
-                return response.text(); // Change to text first to see raw response
+                return response.text();
             })
             .then(text => {
                 
                 try {
                     const data = JSON.parse(text);
                     
-                    // Check if data is an array
                     if (Array.isArray(data)) {
                         currentParts = data;
                         displayParts();
@@ -222,12 +216,10 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
                         table.style.display = 'table';
                         header.style.display = 'block';
                     } else if (data.error) {
-                        // Handle error response
                         console.error('Server error:', data.error);
                         alert('Database error: ' + data.error);
                         loading.style.display = 'none';
                     } else {
-                        // Handle unexpected response format
                         console.error('Unexpected response format:', data);
                         alert('Unexpected response format. Check console for details.');
                         loading.style.display = 'none';
@@ -252,7 +244,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
             
             tbody.innerHTML = '';
             
-            // Check if currentParts is an array and has data
             if (!Array.isArray(currentParts)) {
                 console.error('currentParts is not an array:', currentParts);
                 tbody.innerHTML = '<tr><td colspan="6">Error: Invalid data format</td></tr>';

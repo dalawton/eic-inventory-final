@@ -65,6 +65,5 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $results[] = $row;
 }
 
-// Output as JSON
 header('Content-Type: application/json');
 echo json_encode($results);

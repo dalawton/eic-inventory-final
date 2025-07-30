@@ -27,17 +27,14 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -46,10 +43,8 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -75,11 +70,9 @@ if ($selectedBattery) {
     }
 }
 
-// Handle AJAX request for component selection based on part number
 if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
     $partNumber = $_POST['partNumber'] ?? '';
     
-    // Determine component type based on part number
     $partNumberLower = strtolower($partNumber);
     $components = [];
     
@@ -132,8 +125,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- Sets the default character alphabet, the default screen size and links 
-            to the style sheet with additional formatting --> 
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="styleCheckout.css">
@@ -230,9 +221,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                 <h1>Submit Battery Steps</h1>
                 <p>Select model of the battery completed:</p>
                 <p>Update the amount of parts used and input serial number to add battery into database.</p>
-            </div><br>
-            <button onclick="location.href='barcodeScanning.php'" style="margin-left: 500px;" class="navigation btn btn-secondary">Use Scanner</button>
-            <div class="form-content">
+            </div>
+            <div class="navigation" style="background-color: #f9f9f9;">
+                <button onclick="location.href='barcodeScanning.php'" class="btn btn-secondary">Use Scanner</button>
+            </div>
+            <div class="form-content" style="padding-top: 15px;">
                 <form class="form-section" method="GET" id="batterySelectForm">
                     <div class="form-group">
                         <label for="batteryName">Select Battery:</label>
@@ -257,7 +250,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                         </script>
                     </div>
                 </form>
-                <!-- Existing Battery Form -->
                 <form id="existingBatteryForm" class="battery-form" method="POST" 
                     action="updateInventoryComplete.php" style="display:none;">
                     <div class="form-section">
@@ -287,7 +279,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                                 $isComponentPart = false;
                                 $componentType = '';
                                 
-                                // Check if this part is a subpack, module or cellpack
                                 $partNumberLower = strtolower($partNumber);
                                 
                                 if (strpos($partNumberLower, 'subpack') !== false) {
@@ -323,7 +314,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                             </tr>
                             <?php endforeach; ?>
                             
-                            <!-- Add Part Section -->
                             <tr id="add-part-row">
                                 <td>
                                     <input type="text" class="form-control" id="newPartNumber" placeholder="Part Number">
@@ -351,7 +341,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                         </div>
                     </div>
                 </form>
-                <!-- New Battery Form -->
                 <form id="newBatteryForm" method="POST" action="addNewBattery.php" style="display:none;">
                     <div class="form-section">
                         <div class="form-group">
@@ -399,7 +388,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                     </div>
                 </form>  
             </div>
-            <!-- Navigation -->
             <div class="navigation">
                 <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                     Return to Front Page
@@ -429,7 +417,6 @@ $(document).ready(function() {
     }
     
     function loadComponentsForParts() {
-        // Load components for each part that needs them
         $('.component-row').each(function(index) {
             const $row = $(this);
             const componentContainer = $row.find('.checkbox-group');
@@ -478,19 +465,14 @@ $(document).ready(function() {
     }
     
     window.updateSelectedComponents = function() {
-        // This function is called when checkboxes change
-        // The form submission will automatically collect all checked values
     };
 
-    // On page load, show the correct form if a value is already selected
     showFormForSelection($('#batteryName').val());
 
-    // On dropdown change, show the correct form
     $('#batteryName').on('change', function() {
         showFormForSelection($(this).val());
     });
     
-    // Form validation before submit
     $('#existingBatteryForm').on('submit', function(e) {
         const serialNumber = $('#serialNumber').val().trim();
         if (!serialNumber) {
@@ -499,7 +481,6 @@ $(document).ready(function() {
             return false;
         }
         
-        // Check if any component parts require selection but none are selected
         let missingComponents = false;
         $('.component-row').each(function() {
             const $row = $(this);
@@ -537,9 +518,7 @@ $(document).ready(function() {
 
 <script>
 $(document).ready(function() {
-    // For each row, fetch and update the description
     $('table.product-table tr').each(function(index) {
-        // Skip header row
         if (index === 0) return;
         var $row = $(this);
         var partNumber = $row.find('td:first').text().trim();
@@ -563,7 +542,6 @@ $(document).ready(function() {
         }
     });
 
-    // Auto-fill description when part number changes, only if description is empty
     $('#newPartNumber').on('blur', function() {
         var partNumber = $(this).val().trim();
         var $descInput = $('#newPartDescription');
@@ -606,7 +584,6 @@ $(document).ready(function() {
         }
     });
 
-    // Add Part button click handler
     $('#addPartBtn').click(function() {
         var partNumber = $('#newPartNumber').val().trim();
         var description = $('#newPartDescription').val().trim();
@@ -617,7 +594,6 @@ $(document).ready(function() {
             return;
         }
 
-        // If description is empty, fetch it before adding the row
         if (!description) {
             $.get('getDescription.php', { productNumber: partNumber }, function(data) {
                 let fetchedDescription = '';
@@ -645,13 +621,11 @@ $(document).ready(function() {
                 <td><span style="color: #666;">N/A</span></td>
             </tr>
         `);
-        // Clear the input fields
         $('#newPartNumber').val('');
         $('#newPartDescription').val('');
         $('#newAmountUsed').val('');
     }
 
-    // Add Step button click handler
     $('#addStepBtn').click(function() {
         var partNumber = $('#stepPartNumber').val().trim();
         var description = $('#stepPartDescription').val().trim();
@@ -662,7 +636,6 @@ $(document).ready(function() {
             return;
         }
 
-        // If description is empty, fetch it before adding the row
         if (!description) {
             $.get('getDescription.php', { productNumber: partNumber }, function(data) {
                 let fetchedDescription = '';
@@ -689,7 +662,6 @@ $(document).ready(function() {
                 <td><input type="number" class="form-control" name="amountUsed[]" value="${amountUsed}" min="0" readonly></td>
             </tr>
         `);
-        // Clear the input fields
         $('#stepPartNumber').val('');
         $('#stepPartDescription').val('');
         $('#stepAmountUsed').val('');

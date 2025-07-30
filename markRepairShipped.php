@@ -30,17 +30,14 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -49,10 +46,8 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -66,21 +61,18 @@ if ($conn === false) {
  */
 function sendRepairEmail($formData)
 {
-    // Create a new PHPMailer instance
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
 
     try {
-        // Server settings
         $mail->isSMTP();
         $mail->Host = 'smtp.office365.com';
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['SMTP_EMAIL'];
-        $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
+        $mail->Password = $_ENV['SMTP_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        // Prevent hanging
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
             'ssl' => array(
@@ -90,24 +82,19 @@ function sendRepairEmail($formData)
             )
         );
 
-        // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
 
-        // Content
         $mail->isHTML(true);
         $mail->Subject = 'Repair - Part Completed and Shipped -- Serial Number #' . ($formData['serialNumber'] ?? 'N/A');
 
-        // Generate email body
         $emailBody = generateRepairEmailBody($formData);
         $mail->Body = $emailBody;
 
-        // Plain text version
         $mail->AltBody = generatePlainTextVersion($formData);
 
-        // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Email sent successfully'];
     } catch (Exception $e) {
@@ -221,10 +208,9 @@ function generateRepairEmailBody($formData)
             <p><strong>Serial Number:</strong> ' . htmlspecialchars($formData['serialNumber'] ?? 'N/A') . '</p>
             <p><strong>Date Shipped:</strong> ' . htmlspecialchars($formData['shippingDate'] ?? 'N/A') . '</p>
             <p><strong>Shipping Location:</strong> ' . htmlspecialchars($formData['shippingLocation'] ?? 'N/A') . '</p>
-            <p><strong>Submitted:</strong> ' . date('Y-m-d H:i:s') . '</p>
+            <p><strong>Submitted:</strong> ' . date('Y-m-d') . '</p>
         </div>';
 
-    // Information Section
     $html .= '
     <div class="section">
         <h3>Repair Information</h3>
@@ -253,9 +239,8 @@ function generatePlainTextVersion($formData)
     $text .= "Serial Number: " . ($formData['serialNumber'] ?? 'N/A') . "\n";
     $text .= "Date Shipped: " . ($formData['shippingDate'] ?? 'N/A') . "\n";
     $text .= "Shipping Location: " . ($formData['shippingLocation'] ?? 'N/A') . "\n";
-    $text .= "Submitted: " . date('Y-m-d H:i:s') . "\n\n";
+    $text .= "Submitted: " . date('Y-m-d') . "\n\n";
 
-    // Repair Information
     $text .= "REPAIR DETAILS:\n";
 
     if (!empty($formData['details'])) {
@@ -271,7 +256,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $shippingDate = $formData['shippingDate'];
     $repairNotes = $formData['details'] ?? '';
     $shippingLocation = $formData['shippingLocation'];
-    // Marks Repair as Shipped/Completed
     $updateRepair = sqlsrv_query($conn, "UPDATE dbo.Repairs SET Status = 'SHIPPED' WHERE SerialNumber = ?", [$serialNum]);
     $updateDate = sqlsrv_query($conn, "UPDATE dbo.Repairs SET DateShipped = '$shippingDate' WHERE SerialNumber = ?", [$serialNum]);
     $updateDetails = sqlsrv_query($conn, "UPDATE dbo.Repairs SET ShippingDetails = '$repairNotes' WHERE SerialNumber = ?", [$serialNum]);
@@ -284,7 +268,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $amt = (int)($extraAmounts[$i] ?? 0);
         
         if (!empty($pn) && $amt > 0) {
-            // Update inventory for extra parts
             $invCheck = sqlsrv_query($conn, "SELECT Amount from dbo.Inventory WHERE PN = ?", [$pn]);
             if ($row = sqlsrv_fetch_array($invCheck, SQLSRV_FETCH_ASSOC)) {
                 $newQty = $row['Amount'] - $amt;
@@ -294,7 +277,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception("Failed to update inventory for extra part $pn: " . print_r(sqlsrv_errors(), true));
                 }
             } else {
-                // If part doesn't exist in inventory, create it
                 $insertStmt = sqlsrv_query($conn, "INSERT INTO dbo.Inventory (PN, Amount) VALUES (?, ?, ?)", [$pn, -$amt]);
                 
                 if ($insertStmt === false) {
@@ -304,11 +286,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Mark in All_Batteries table
     $sqlAll = "UPDATE dbo.All_Batteries SET Status = 'SHIPPED' WHERE SN = $serialNum";
     sqlsrv_query($conn, $sqlAll);
 
-    // After updating Repairs table
     $logSql = "INSERT INTO dbo.InventoryLog 
         (ActionType, TableAffected, ProductNumber, Description, Status) 
         VALUES (?, ?, ?, ?, ?)";

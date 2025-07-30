@@ -27,17 +27,14 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -46,15 +43,12 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Get all non-received POs
 $sql = "SELECT PONum FROM POs WHERE Status = 'Ordered'";
 $stmt = sqlsrv_query($conn, $sql);
 $poOptions = [];
@@ -62,7 +56,6 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $poOptions[] = $row['PONum'];
 }
 
-// On dropdown selection
 $selectedPO = $_GET['PO'] ?? null;
 $items = [];
 if ($selectedPO) {
@@ -122,7 +115,7 @@ if ($selectedPO) {
                 <form method="get" action="">
                     <div class="form-group">
                         <label for="PO">Select PO:</label>
-                        <select name="PO" class="form-control" id="PO" onchange="this.form.submit()"> <!-- Dropdown for unreceived POs -->
+                        <select name="PO" class="form-control" id="PO" onchange="this.form.submit()">
                             <option value="">--Select--</option>
                             <?php foreach ($poOptions as $PONum) : ?>
                                 <option value="<?php echo htmlspecialchars($PONum) ?>" <?php echo $selectedPO == $PONum ? 'selected' : '' ?>>
@@ -169,13 +162,11 @@ if ($selectedPO) {
                                 <th>Received</th>
                                 <th>Amount Received</th>
                             </tr>
-                            <!-- Loops through the POItems that are assigned the selected PO number and displays them -->
                             <?php foreach ($items as $item) : ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($item['PN'] ?? '') ?></td>
                                 <td><?php echo htmlspecialchars($item['Quantity'] ?? '') ?></td>
                                 <td>
-                                    <!-- Assigns a checkbox next to each item in the order to mark that item as received -->
                                     <input type="checkbox" name="received_items[]" value="<?php echo htmlspecialchars($item['ItemID']) ?>">
                                 </td>
                                 <td><input type="number" class="form-control" name="amountRecieved" value="<?php echo htmlspecialchars($item['Quantity'] ?? '') ?>"></td>
@@ -191,7 +182,6 @@ if ($selectedPO) {
                 </div>
             </div>
         <?php endif; ?>
-        <!-- Navigation -->
         <div class="navigation">
             <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                 Return to Front Page

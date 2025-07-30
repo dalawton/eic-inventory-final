@@ -30,17 +30,14 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 use Dotenv\Dotenv;
 
-// Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -49,10 +46,8 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -68,12 +63,10 @@ if ($conn === false) {
  */
 function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
 {
-    // Create a new PHPMailer instance
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
 
     try {
-        // Server settings
         $mail->isSMTP();
         $mail->Host = 'smtp.office365.com';
         $mail->SMTPAuth = true;
@@ -91,7 +84,6 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
             )
         );
 
-        // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['PATSY_EMAIL'], 'Patricia Riley');
@@ -101,18 +93,14 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         if (!empty($formData['requestorEmail'])) {
             $mail->addCC($formData['requestorEmail'], $formData['requestorName']);
         }
-        // $mail->addCC('', '');
 
-        // Content
         $mail->isHTML(true);
         $mail->Subject = 'Purchase Order Requisition - PO #' . ($formData['purchaseOrderNumber'] ?? 'N/A');
 
-        // Generate email body
         $emailBody = generatePurchaseOrderEmailBody($formData, $products, $vendorDetails);
         $mail->Body = $emailBody;
         $mail->AltBody = generatePlainTextVersion($formData, $products, $vendorDetails);
 
-        // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Purchase order email sent successfully'];
         
@@ -132,15 +120,12 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
  */
 function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [])
 {
-    // Debug logging
     error_log("Form data: " . print_r($formData, true));
     error_log("Vendor details: " . print_r($vendorDetails, true));
     
-    // Determine if this is a new vendor or existing vendor
     $isNewVendor = ($formData['vendorName'] === 'not_listed');
     
     if ($isNewVendor) {
-        // Use form data for new vendors
         $vendorName = $formData['otherName'] ?? 'N/A';
         $telephone = $formData['vendorPhone'] ?? 'N/A';
         $contactName = $formData['contactName'] ?? 'N/A';
@@ -151,7 +136,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
                          ($formData['supplierZip'] ?? ''));
         if ($citySTZIP === ', ') $citySTZIP = 'N/A';
     } else {
-        // Use database vendor details for existing vendors, with form fallbacks
         $vendorName = $vendorDetails['VendorName'] ?? $formData['vendorName'] ?? 'N/A';
         $telephone = $vendorDetails['Telephone'] ?? 'N/A';
         $contactName = $vendorDetails['ContactName'] ?? 'N/A';
@@ -263,7 +247,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
             <p><strong>Submitted:</strong> ' . date('Y-m-d') . '</p>
         </div>';
 
-    // Special Requests Section
     if (!empty($formData['needWorkOrder']) || !empty($formData['confirming'])) {
         $html .= '
         <div class="section">
@@ -280,7 +263,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
         $html .= '</div></div>';
     }
 
-    // Vendor Information Section
     $html .= '
     <div class="section">
         <h3>Vendor Information</h3>
@@ -312,7 +294,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
         </div>
     </div>';
 
-    // Payment Information Section
     $html .= '
     <div class="section">
         <h3>Payment & Order Information</h3>
@@ -368,7 +349,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
         </div>
     </div>';
 
-    // Products Section
     if (!empty($products)) {
         $html .= '
         <div class="section">
@@ -443,7 +423,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
  */
 function generatePlainTextVersion($formData, $products)
 {
-    // Similar logic as HTML version for vendor details
     $isNewVendor = ($formData['vendorName'] === 'not_listed');
     
     if ($isNewVendor) {
@@ -459,7 +438,6 @@ function generatePlainTextVersion($formData, $products)
     $text .= "Date: " . ($formData['date'] ?? 'N/A') . "\n";
     $text .= "Submitted: " . date('Y-m-d') . "\n\n";
 
-    // Special Requests
     if (!empty($formData['needWorkOrder']) || !empty($formData['confirming'])) {
         $text .= "SPECIAL REQUESTS:\n";
         if (!empty($formData['needWorkOrder'])) {
@@ -471,7 +449,6 @@ function generatePlainTextVersion($formData, $products)
         $text .= "\n";
     }
 
-    // Vendor Information
     $text .= "VENDOR INFORMATION:\n";
     $text .= "Vendor Name: " . $vendorName . "\n";
     
@@ -504,7 +481,6 @@ function generatePlainTextVersion($formData, $products)
     }
     $text .= "\n";
 
-    // Payment & Order Information
     $text .= "PAYMENT & ORDER INFORMATION:\n";
     $text .= "Requestor: " . ($formData['requestorName'] ?? 'N/A') . "\n";
     $text .= "Contract Number: " . ($formData['contractNumber'] ?? 'N/A');
@@ -514,7 +490,6 @@ function generatePlainTextVersion($formData, $products)
     $text .= "\n";
     $text .= "Delivery Address: 111 Downey Street, Norwood, MA 02062\n\n";
 
-    // Products
     if (!empty($products)) {
         $text .= "REQUESTED PRODUCTS:\n";
         $text .= str_repeat("-", 80) . "\n";
@@ -607,7 +582,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $supplierCitySTZIP = $supplierCity . ", " . $supplierState . " " . $supplierZip;
     $vendorPhone = $formData['vendorPhone'];
 
-    // Add new vendor if needed
     if (!empty($otherName)) {
         $sql = "INSERT INTO dbo.Vendors (VendorName, Telephone, AddressLine1, CitySTZIP) VALUES (?, ?, ?, ?)";
         $params = [$otherName, $vendorPhone, $supplierStreetAddress, $supplierCitySTZIP];
@@ -618,7 +592,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Add new contract number if needed
     if ($formData['contractNumber'] === 'other' && !empty($formData['otherContractNumber'])) {
         $sql = "INSERT INTO dbo.contractNumbers (contractNumber) VALUES (?)";
         $params = [$formData['otherContractNumber']];
@@ -644,7 +617,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log("No vendorName provided for lookup or vendor is new");
     }
 
-    // Insert Purchase Order with correct price
     $sql = "INSERT INTO dbo.POs (PONum, Purchaser, Date, VendorName, Price, Status) VALUES (?, ?, ?, ?, ?, ?)";
     $vendorNameForDB = ($formData['vendorName'] === 'not_listed') ? $formData['otherName'] : $formData['vendorName'];
     $params = [$purchaseOrderNumber, $requestor, $orderDate, $vendorNameForDB, $final_total, 'Submitted'];
@@ -654,7 +626,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Error inserting PO: " . print_r(sqlsrv_errors(), true));
     }
 
-    // Insert POItems with correct prices
     foreach ($processedProducts as $product) {
         $sql = "INSERT INTO dbo.POItems (PONum, PN, Quantity, UnitPrice, Description, Total) VALUES (?, ?, ?, ?, ?, ?)";
         $params = [
@@ -672,7 +643,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Send email
     $result = sendPurchaseOrderEmail($formData, $processedProducts, $vendorDetails);
 
     if ($result['success']) {

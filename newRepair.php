@@ -29,17 +29,14 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 use Dotenv\Dotenv;
 
-// Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -48,10 +45,8 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -65,21 +60,18 @@ if ($conn === false) {
  */
 function sendRepairEmail($formData)
 {
-    // Create a new PHPMailer instance
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
 
     try {
-        // Server settings
         $mail->isSMTP();
         $mail->Host = 'smtp.office365.com';
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['SMTP_EMAIL'];
-        $mail->Password = $_ENV['SMTP_PASSWORD']; // This is your app password
+        $mail->Password = $_ENV['SMTP_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        // Prevent hanging
         $mail->Timeout = 30;
         $mail->SMTPOptions = array(
             'ssl' => array(
@@ -89,29 +81,23 @@ function sendRepairEmail($formData)
             )
         );
 
-        // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
 
-        // Add CC if specified
         if (!empty($_POST['receiver-email'])) {
             $mail->addCC($_POST['receiver-email'], $_GET['receiver']);
         }
 
-        // Content
         $mail->isHTML(true);
         $mail->Subject = 'Repair - Part Received -- Serial Number #' . ($formData['serialNumber'] ?? 'N/A');
 
-        // Generate email body
         $emailBody = generateRepairEmailBody($formData);
         $mail->Body = $emailBody;
 
-        // Plain text version
         $mail->AltBody = generatePlainTextVersion($formData);
 
-        // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Email sent successfully'];
     } catch (Exception $e) {
@@ -223,7 +209,7 @@ function generateRepairEmailBody($formData)
         <div class="header">
             <h1>Repair - Part Received</h1>
             <p><strong>Serial Number:</strong> ' . htmlspecialchars($formData['serialNumber'] ?? 'N/A') . '</p>
-            <p><strong>Submitted:</strong> ' . date('Y-m-d H:i:s') . '</p>
+            <p><strong>Submitted:</strong> ' . date('Y-m-d') . '</p>
         </div>';
 
     // Information Section
@@ -260,7 +246,6 @@ function generatePlainTextVersion($formData)
     $text .= "Serial Number: " . ($formData['serialNumber'] ?? 'N/A') . "\n";
     $text .= "Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
 
-    // Repair Information
     $text .= "REPAIR INFORMATION:\n";
     $text .= "Received Date: " . ($formData['receivedDate'] ?? 'N/A') . "\n";
     $text .= "Receiver Name: " . ($formData['receiver'] ?? 'N/A') . "\n";
@@ -301,7 +286,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $customerName = $formData['customerName'] ?? 'Unknown';
     $issueDetails = $formData['issueDetails'] ?? 'Repair received';
     
-    // Insert into InventoryLog
     $logSql = "INSERT INTO dbo.InventoryLog 
         (ActionType, TableAffected, ProductNumber, Description, Status) 
         VALUES (?, ?, ?, ?, ?)";

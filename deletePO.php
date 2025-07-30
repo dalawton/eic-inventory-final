@@ -23,23 +23,21 @@
  */
 
 // phpcs:disable Generic.Files.LineLength.TooLong
+
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -48,10 +46,7 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
-
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -87,23 +82,19 @@ function sendCancelEmail($formData, $POnumber)
             )
         );
 
-        // Recipients
         $mail->setFrom($_ENV['SMTP_EMAIL'], 'EIC Inventory System');
         $mail->addAddress($_ENV['TRUNG_EMAIL'], 'Trung Nguyen');
         $mail->addCC($_ENV['PATSY_EMAIL'], 'Patricia Riley');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
 
-        // Content
         $mail->isHTML(true);
         $mail->Subject = 'Purchase Order CANCELLED - PO #' . ($formData['PO'] ?? 'N/A');
 
-        // Generate email body
         $emailBody = generateCancelledEmailBody($formData, $POnumber);
         $mail->Body = $emailBody;
         $mail->AltBody = generatePlainTextVersion($formData, $POnumber);
 
-        // Send the email
         $mail->send();
         return ['success' => true, 'message' => 'Purchase order email sent successfully'];
         
@@ -186,7 +177,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $logSql = "UPDATE dbo.POs SET Status = ? WHERE PONum = ?";
     $logParams = ['Cancelled', $POnumber];
     $stmt = sqlsrv_query($conn, $logSql, $logParams);
-    // Execute the query
     if ($stmt === false) {
         die(print_r(sqlsrv_errors(), true));
     } else {
@@ -202,7 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Free the statement and close the connection
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>

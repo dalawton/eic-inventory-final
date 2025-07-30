@@ -26,17 +26,14 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
-// Load environment variables (from .env)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// Database connection parameters
 $serverName = $_ENV['DB_HOST'];
 $dbUser = $_ENV['DB_USER'];
 $databaseName = $_ENV['DB_DATABASE'];
 $dbPassword = $_ENV['DB_PASSWORD'];
 
-// This establishes the login information as combined
 $connectionOptions = [
     "Database" => (string)$databaseName,
     "Uid" => (string)$dbUser,
@@ -45,15 +42,12 @@ $connectionOptions = [
     "TrustServerCertificate" => true,
 ];
 
-// Connect to the sql server using the server name and the combined login data
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
-// throws an error if the connection cannot be established
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-// Search logic for search button
 $search = '';
 $where = '';
 $params = [];
@@ -71,11 +65,9 @@ if (isset($_GET['searchPO']) && $_GET['searchPO'] !== '') {
     $where = "WHERE Purchaser LIKE ?";
     $params = ["%$search%"];
 }
-// Searches through POs using the search critera
 $sql = "SELECT * FROM POs $where ORDER BY PONum DESC";
 $stmt = sqlsrv_query($conn, $sql, $params);
 
-// if fails, throws an error
 if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
@@ -150,7 +142,6 @@ if ($stmt === false) {
         <div class="header">
             <h1>All Purchase Orders</h1>
         </div>
-        <!-- Search Form -->
         <div class="form-content">
             <form class="form-control" method="get" action="">
                 <input type="search" style="width: 29%;" class="form-control" name="searchPO" placeholder="Search PO Number..." value="<?php echo htmlspecialchars($_GET['searchPO'] ?? '') ?>">
@@ -166,7 +157,6 @@ if ($stmt === false) {
                     <tr>
                         <?php
                         echo "<div class='table-header'>";
-                        // Fetch the first row to get column names
                         $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
                         if ($row) {
                             foreach (array_keys($row) as $colName) {
@@ -175,7 +165,6 @@ if ($stmt === false) {
                             echo "</div>";
                             echo "</tr>";
 
-                            // Output the first row
                             foreach ($row as $colName => $value) {
                                 $statusType = strtolower($row['Status']);
                                 $isCancelled = ($row['Status'] === "Cancelled");
@@ -203,7 +192,6 @@ if ($stmt === false) {
                             }
                             echo "</tr>";
 
-                            // Output the rest
                             while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
                                 $isCancelled = ($row['Status'] === "Cancelled");
                                 echo "<tr" . ($isCancelled ? " class='reverted'" : "text") . ">";
@@ -239,7 +227,6 @@ if ($stmt === false) {
                 </table>
             </div>
         </div>
-        <!-- Navigation -->
         <div class="navigation">
             <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">
                 Return to Front Page
