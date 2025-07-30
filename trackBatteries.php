@@ -147,29 +147,29 @@ $statusStmt = sqlsrv_query($conn, $sqlStatusType);
             <h1>All Batteries</h1>
         </div>
         <div class="form-content">
-                <form class="form-control" method="get" action="">
-                    <input type="search" style="width: 27%; margin-right: 10px;" class="form-control" name="searchSN" placeholder="Search by Serial Number" value="<?php echo htmlspecialchars($_GET['searchSN'] ?? '') ?>">
-                    <select name="batterySelect" style="width: 27%; margin-right: 10px;" class="form-control" id="batterySelect" onchange="this.form.submit()">
-                        <option value="">-- Filter by Battery Type --</option>
-                        <?php while ($row = sqlsrv_fetch_array($batteriesStmt, SQLSRV_FETCH_ASSOC)) : ?>
-                            <option value="<?php echo htmlspecialchars($row['BatteryName']) ?>">
-                                <?php echo htmlspecialchars($row['BatteryName']) ?>
-                            </option>
-                        <?php endwhile; ?>
-                    </select>
-                    <select name="statusSelect" style="width: 27%; margin-right: 10px;" class="form-control" id="statusSelect" onchange="this.form.submit()">
-                        <option value="">-- Filter by Status --</option>
-                        <?php while ($row = sqlsrv_fetch_array($statusStmt, SQLSRV_FETCH_ASSOC)) : ?>
-                            <option value="<?php echo htmlspecialchars($row['Status']) ?>">
-                                <?php echo htmlspecialchars($row['Status']) ?>
-                            </option>
-                        <?php endwhile; ?>
-                    </select>
-                    <button type="submit" class="btn btn-secondary">Search</button>
-                    <?php if ($search) : ?>
-                        <a href="trackBatteries.php">Clear</a>
-                    <?php endif; ?>
-                </form>
+            <form class="form-control" method="get" action="">
+                <input type="search" style="width: 27%; margin-right: 10px;" class="form-control" name="searchSN" placeholder="Search by Serial Number" value="<?php echo htmlspecialchars($_GET['searchSN'] ?? '') ?>">
+                <select name="batterySelect" style="width: 27%; margin-right: 10px;" class="form-control" id="batterySelect" onchange="this.form.submit()">
+                    <option value="">-- Filter by Battery Type --</option>
+                    <?php while ($row = sqlsrv_fetch_array($batteriesStmt, SQLSRV_FETCH_ASSOC)) : ?>
+                        <option value="<?php echo htmlspecialchars($row['BatteryName']) ?>">
+                            <?php echo htmlspecialchars($row['BatteryName']) ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+                <select name="statusSelect" style="width: 27%; margin-right: 10px;" class="form-control" id="statusSelect" onchange="this.form.submit()">
+                    <option value="">-- Filter by Status --</option>
+                    <?php while ($row = sqlsrv_fetch_array($statusStmt, SQLSRV_FETCH_ASSOC)) : ?>
+                        <option value="<?php echo htmlspecialchars($row['Status']) ?>">
+                            <?php echo htmlspecialchars($row['Status']) ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+                <button type="submit" class="btn btn-secondary">Search</button>
+                <?php if ($search) : ?>
+                    <a href="trackBatteries.php">Clear</a>
+                <?php endif; ?>
+            </form>
             <div class="product-table-container">
                 <table class="product-table" name="partsTable" id="partsTable" border="1">
                     <tr>

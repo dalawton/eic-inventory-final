@@ -351,11 +351,6 @@ if ($contractStmt === false) {
                 </div>
             </div>
 
-            <form id="comments" method="POST" class="action-buttons" style="display:block; text-align:center;">
-                <p><strong>Add any comments here:</strong></p><br>
-                <input type="text" id="comment" name="comment" class="form-control">
-            </form>
-
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button type="button" id="submitAllButton" class="btn btn-success">
@@ -492,9 +487,6 @@ if ($contractStmt === false) {
             const tableRows = document.querySelectorAll("#productTableSubmitted tbody tr");
             
             const combinedData = new FormData(supplierForm);
-            const commentsForm = document.getElementById('comments');
-            const commentsInput = commentsForm.querySelector('input[type="text"]');
-            combinedData.append('comments', commentsInput.value);
             // Collect all rows from the table with proper price parsing
             const products = [];
             tableRows.forEach(row => {
@@ -520,7 +512,7 @@ if ($contractStmt === false) {
 
             // Debug: Log products to console
             console.log('Products being sent:', products);
-            if (empty(products)){
+            if (products.length === 0) {
                 console.error('Empty Purchase Order! Please add products');
                 alert("Error: Empty Purchase Order");
             } else {

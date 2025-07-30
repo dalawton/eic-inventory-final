@@ -47,7 +47,7 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-$sql = "SELECT * FROM dbo.Issues";
+$sql = "SELECT * FROM dbo.Issues ORDER BY IssueID DESC";
 $stmt = sqlsrv_query($conn, $sql);
 
 if ($stmt === false) {
@@ -76,7 +76,6 @@ if ($stmt === false) {
                 </div>
                 <table class="product-table" border="1">
                     <tr>
-                        <th>IssueID</th>
                         <th>Type of Request</th>
                         <th>Date Submitted</th>
                         <th>Details</th>
@@ -84,9 +83,8 @@ if ($stmt === false) {
                     </tr>
                     <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($row['IssueID']) ?></td>
                             <td><?php echo htmlspecialchars($row['TypeRequest']) ?></td>
-                            <td><?php echo htmlspecialchars(($row['Date'])->format('Y-m-d H:i:s')) ?></td>
+                            <td><?php echo htmlspecialchars(($row['Date'])->format('Y-m-d')) ?></td>
                             <td><?php echo htmlspecialchars($row['Details']) ?></td>
                             <td><?php echo htmlspecialchars($row['Status']) ?></td>
                         </tr>

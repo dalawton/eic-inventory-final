@@ -418,10 +418,6 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
     }
 
     $html .= '
-        <div class="section">
-            <span class="info-comments">Comments from Requestor:</span><br>
-            ' . htmlspecialchars($formData['comment'] ?? '') . '
-        </div>
         <div style="background: white; padding: 15px; border: 2px dashed #007bff; margin-top: 20px;">
             <p><strong>Your Signature:</strong></p>
             <br>
@@ -461,7 +457,7 @@ function generatePlainTextVersion($formData, $products)
 
     $text .= "PO Number: " . ($formData['purchaseOrderNumber'] ?? 'N/A') . "\n";
     $text .= "Date: " . ($formData['date'] ?? 'N/A') . "\n";
-    $text .= "Submitted: " . date('Y-m-d H:i:s') . "\n\n";
+    $text .= "Submitted: " . date('Y-m-d') . "\n\n";
 
     // Special Requests
     if (!empty($formData['needWorkOrder']) || !empty($formData['confirming'])) {
@@ -602,7 +598,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vendorName = $formData['vendorName'];
     $orderDate = $formData['date'];
     $requestor = $formData['requestorName'];
-    $contractNumber = $formData['otherContractNumber'];
+    $contractNumber = ($formData['contractNumber'] === 'other') ? $formData['otherContractNumber'] : $formData['contractNumber'];
     $otherName = $formData['otherName'];
     $supplierStreetAddress = $formData['supplierStreetAddress'];
     $supplierCity = $formData['supplierCity'];
@@ -623,15 +619,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Add new contract number if needed
-    if (!empty($contractNumber && $contractNumber === 'other')) {
-        if (!empty($formData['otherContractNumber'])){
-            $sql = "INSERT INTO dbo.contractNumbers (contractNumber) VALUES (?)";
-            $params = [$contractNumber];
-            $stmt = sqlsrv_query($conn, $sql, $params);
-            if ($stmt === false) {
-                error_log("Contract insert failed: " . print_r(sqlsrv_errors(), true));
-                die("Error inserting contract: " . print_r(sqlsrv_errors(), true));
-            }
+    if ($formData['contractNumber'] === 'other' && !empty($formData['otherContractNumber'])) {
+        $sql = "INSERT INTO dbo.contractNumbers (contractNumber) VALUES (?)";
+        $params = [$formData['otherContractNumber']];
+        $stmt = sqlsrv_query($conn, $sql, $params);
+        if ($stmt === false) {
+            error_log("Contract insert failed: " . print_r(sqlsrv_errors(), true));
+            die("Error inserting contract: " . print_r(sqlsrv_errors(), true));
         }
     }
 
@@ -652,7 +646,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Insert Purchase Order with correct price
     $sql = "INSERT INTO dbo.POs (PONum, Purchaser, Date, VendorName, Price, Status) VALUES (?, ?, ?, ?, ?, ?)";
-    $params = [$purchaseOrderNumber, $requestor, $orderDate, $otherName, $final_total, "Ordered"];
+    $vendorNameForDB = ($formData['vendorName'] === 'not_listed') ? $formData['otherName'] : $formData['vendorName'];
+    $params = [$purchaseOrderNumber, $requestor, $orderDate, $vendorNameForDB, $final_total, 'Submitted'];
     $stmt = sqlsrv_query($conn, $sql, $params);
     if ($stmt === false) {
         error_log("PO insert failed: " . print_r(sqlsrv_errors(), true));

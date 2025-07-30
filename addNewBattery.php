@@ -60,8 +60,8 @@ $descriptions = $_POST['description'] ?? [];
 $amountsUsed = $_POST['amountUsed'] ?? [];
 $complete = $_POST['complete'];
 
-$sql = "INSERT INTO dbo.Battery (Name, Amount, Complete) VALUES (?, ?, ?)";
-$params = [$newBatteryName, 0, $complete];
+$sql = "INSERT INTO dbo.Battery (Name, Complete) VALUES (?, ?)";
+$params = [$newBatteryName, $complete];
 $stmt = sqlsrv_query($conn, $sql, $params);
 
 if ($stmt === false) {

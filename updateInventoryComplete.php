@@ -116,7 +116,6 @@ try {
             throw new Exception("Failed to update component status for SN $componentSN: " . print_r(sqlsrv_errors(), true));
         }
         
-        // Optional: Create a relationship record between the new battery and its components
         if ($serialNumber) {
             $sqlRelation = "INSERT INTO dbo.Battery_Components (ParentSN, ComponentSN, DateUsed) VALUES (?, ?, GETDATE())";
             $stmtRelation = sqlsrv_query($conn, $sqlRelation, [$serialNumber, $componentSN]);
@@ -212,7 +211,6 @@ try {
     $message = "Error processing request: " . $e->getMessage();
 }
 
-sqlsrv_close($conn);
 ?>
 <html>
     <head>

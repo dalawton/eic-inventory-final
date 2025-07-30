@@ -230,7 +230,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'getComponentsForPart') {
                 <h1>Submit Battery Steps</h1>
                 <p>Select model of the battery completed:</p>
                 <p>Update the amount of parts used and input serial number to add battery into database.</p>
-            </div>
+            </div><br>
+            <button onclick="location.href='barcodeScanning.php'" style="margin-left: 500px;" class="navigation btn btn-secondary">Use Scanner</button>
             <div class="form-content">
                 <form class="form-section" method="GET" id="batterySelectForm">
                     <div class="form-group">

@@ -3,7 +3,7 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
- * Returns information about selected vendor
+ * File to change status of Purchase Order to ordered
  *
  * PHP version 8
  *
@@ -13,7 +13,7 @@
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
  *
- * @category  Get_Files
+ * @category  Change_Files
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
  * @copyright 1999 - 2019 The PHP Group
@@ -43,23 +43,33 @@ $connectionOptions = [
 ];
 
 $conn = sqlsrv_connect($serverName, $connectionOptions);
+
 if ($conn === false) {
-    echo json_encode(['error' => 'Connection failed']);
-    exit;
+    die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
+$poNum = $_POST['PONum'] ?? null;
 
-$vendorName = $_GET['vendorName'] ?? '';
-if (!$vendorName) {
-    echo json_encode(['error' => 'No vendor name']);
-    exit;
-}
+$sql = "UPDATE dbo.POs SET Status = 'Ordered' WHERE PONum = $poNum";
+sqlsrv_query($conn, $sql);
 
-$sql = "SELECT VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorName = ?";
-$stmt = sqlsrv_query($conn, $sql, [$vendorName]);
-if ($stmt === false) {
-    echo json_encode(['error' => 'Query failed']);
-    exit;
-}
-
-$row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-echo json_encode($row);
+echo "Purchase Order updated!";
+?>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="stylePurchaseOrder.css">
+    </head>
+    <body>
+        <div class="main-container">
+            <div class="navigation">
+                    <button onclick="location.href='shipBatteries.php'" class="btn btn-secondary">
+                        Go Back
+                    </button>
+                    <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">
+                        Report an Issue
+                    </button>
+            </div>
+        </div>
+    </body>
+</html>

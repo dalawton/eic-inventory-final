@@ -3,7 +3,7 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
- * Returns information about selected vendor
+ * File to fetch the information about scanned part.
  *
  * PHP version 8
  *
@@ -13,7 +13,7 @@
  * the PHP License and are unable to obtain it through the web, please
  * send a note to license@php.net so we can mail you a copy immediately.
  *
- * @category  Get_Files
+ * @category  Get_File
  * @package   None
  * @author    Danielle Lawton <daniellelawton8@gmail.com>
  * @copyright 1999 - 2019 The PHP Group
@@ -43,23 +43,41 @@ $connectionOptions = [
 ];
 
 $conn = sqlsrv_connect($serverName, $connectionOptions);
-if ($conn === false) {
-    echo json_encode(['error' => 'Connection failed']);
+
+header('Content-Type: application/json');
+
+$partNumber = $_GET['partNumber'] ?? '';
+if (!$partNumber) {
+    echo json_encode(['exists' => false]);
     exit;
 }
 
-$vendorName = $_GET['vendorName'] ?? '';
-if (!$vendorName) {
-    echo json_encode(['error' => 'No vendor name']);
-    exit;
-}
-
-$sql = "SELECT VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorName = ?";
-$stmt = sqlsrv_query($conn, $sql, [$vendorName]);
-if ($stmt === false) {
-    echo json_encode(['error' => 'Query failed']);
-    exit;
-}
-
+$sql = "SELECT Amount, Details FROM dbo.Inventory WHERE PN = ?";
+$stmt = sqlsrv_query($conn, $sql, [$partNumber]);
 $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-echo json_encode($row);
+
+if ($row) {
+    echo json_encode([
+        'exists' => true,
+        'quantity' => $row['Amount'],
+        'description' => $row['Details'],
+        'isComponent' => false
+    ]);
+    exit;
+}
+
+$sql2 = "SELECT Status, BatteryName FROM dbo.All_Batteries WHERE SN = ?";
+$stmt2 = sqlsrv_query($conn, $sql2, [$partNumber]);
+$row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
+
+if ($row2) {
+    echo json_encode([
+        'exists' => true,
+        'quantity' => ($row2['Status'] === 'IN-HOUSE') ? 1 : 0,
+        'description' => $row2['BatteryName'],
+        'isComponent' => true
+    ]);
+    exit;
+}
+
+echo json_encode(['exists' => false]);
