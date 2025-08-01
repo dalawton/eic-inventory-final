@@ -145,6 +145,9 @@ $statusStmt = sqlsrv_query($conn, $sqlStatusType);
             <h1>All Batteries</h1>
         </div>
         <div class="form-content">
+            <div class="navigation" style="background-color: #f9f9f9; padding-top: 0px;">
+                <button onclick="location.href='updateLinks.php'" class="btn btn-secondary">Update component links</button>
+            </div>
             <form class="form-control" method="get" action="">
                 <input type="search" style="width: 27%; margin-right: 10px;" class="form-control" name="searchSN" placeholder="Search by Serial Number" value="<?php echo htmlspecialchars($_GET['searchSN'] ?? '') ?>">
                 <select name="batterySelect" style="width: 27%; margin-right: 10px;" class="form-control" id="batterySelect" onchange="this.form.submit()">

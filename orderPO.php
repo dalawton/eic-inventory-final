@@ -70,7 +70,7 @@ if ($conn === false) {
             </div>
             <div class="form-content">
                 <div class="form-section">
-                    <form method="get" action="markPOOrdered.php">
+                    <form method="POST" action="markPOOrdered.php">
                         <div class="form-group">
                             <label for="PO">Select Purchase Order:</label>
                             <select name="PO" class="form-control" id="PO">   
@@ -81,6 +81,7 @@ if ($conn === false) {
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <input type="hidden" name="poNum" value="<?php echo htmlspecialchars($selectedPO) ?>">
                             <br>
                             <button type="submit" class="btn btn-submit">Mark PO as Ordered</button>
                         </div>

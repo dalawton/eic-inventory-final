@@ -89,10 +89,10 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
         $mail->addCC($_ENV['PATSY_EMAIL'], 'Patricia Riley');
         $mail->addCC($_ENV['MAX_EMAIL'], 'Maxwell Landolphi');
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
-
-        if (!empty($formData['requestorEmail'])) {
-            $mail->addCC($formData['requestorEmail'], $formData['requestorName']);
-        }
+        
+        $requestor = $_POST['requestorName'];
+        $requestorEmail = $_POST['requestorEmail'];
+        $mail->addCC($requestorEmail, $requestor);
 
         $mail->isHTML(true);
         $mail->Subject = 'Purchase Order Requisition - PO #' . ($formData['purchaseOrderNumber'] ?? 'N/A');

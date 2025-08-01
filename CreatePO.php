@@ -143,7 +143,7 @@ if ($contractStmt === false) {
 
                         <div class="form-group">
                             <label for="requestorEmail">Requestor's Email:</label>
-                            <input type="text" id="requestorEmail" name="requestorEmail" class="form-control">
+                            <input type="text" id="requestorEmail" name="requestorEmail" class="form-control" required>
                         </div>
                     </div>
                 </div>

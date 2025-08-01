@@ -90,6 +90,7 @@ if (isset($_POST['action'])) {
         
         $sqlUpdate = "UPDATE dbo.Battery_Components 
                      SET ComponentSN = ? 
+                     SET DateUsed = Date
                      WHERE ParentSN = ? AND ComponentSN = ?";
         $updateStmt = sqlsrv_query($conn, $sqlUpdate, [$newComponentSN, $parentSN, $oldComponentSN]);
         
@@ -345,7 +346,8 @@ $stmt = sqlsrv_query($conn, $sql, $params);
                         <div class="component-info">
                             <strong>Component SN:</strong> ${component.ComponentSN} | 
                             <strong>Battery:</strong> ${component.BatteryName} | 
-                            <strong>Status:</strong> ${component.Status}
+                            <strong>Status:</strong> ${component.Status} |
+                            <strong>Date Used:</strong> ${component.Date}
                         </div>
                         <div id="component-actions" class="component-actions">
                             <button class="btn btn-update" onclick="showUpdateForm('${component.ComponentSN}')">Update</button>
@@ -383,6 +385,7 @@ $stmt = sqlsrv_query($conn, $sql, $params);
                 formData.append('parentSN', selectedParentSN);
                 formData.append('oldComponentSN', oldComponentSN);
                 formData.append('newComponentSN', newComponentSN);
+                formData.append('DateUsed', date);
                 
                 fetch('', {
                     method: 'POST',

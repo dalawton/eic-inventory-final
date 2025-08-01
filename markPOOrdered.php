@@ -47,10 +47,10 @@ $conn = sqlsrv_connect($serverName, $connectionOptions);
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
-$poNum = $_POST['PONum'] ?? null;
+$poNum = $_POST['PO'];
 
-$sql = "UPDATE dbo.POs SET Status = 'Ordered' WHERE PONum = $poNum";
-sqlsrv_query($conn, $sql);
+$sql = "UPDATE dbo.POs SET Status = 'Ordered' WHERE PONum = ?";
+sqlsrv_query($conn, $sql, [$poNum]);
 
 echo "Purchase Order updated!";
 ?>
