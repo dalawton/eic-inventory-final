@@ -59,7 +59,7 @@ if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
 
-$selectedBattery = $_GET['batteryName'] ?? null;
+$selectedBattery = $_GET['batteryName'] ?? '';
 $items = [];
 
 if ($selectedBattery) {

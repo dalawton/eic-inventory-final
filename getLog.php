@@ -168,7 +168,6 @@ $stmt = sqlsrv_query($conn, $sql);
                             } elseif ($tableType === "batteries") {
                                 $tableClass = "table-batteries";
                             }
-                            echo "<tr" . ($isReverted ? " class='reverted'" : "") . ">";
                             echo "<td style='width: 10%;'>" . htmlspecialchars($row['ActionTime']->format('Y-m-d')) . "</td>";
                             echo "<td style='width: 10%;'><span class='action-label $actionClass'>" . htmlspecialchars(ucfirst($row['ActionType'])) . "</span></td>";
                             echo "<td style='width: 8%;'><span class='$tableClass'>" . htmlspecialchars($row['TableAffected'] ?? '') . "</span></td>";

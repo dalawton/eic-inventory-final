@@ -87,7 +87,7 @@ function sendRepairEmail($formData)
         $mail->addCC($_ENV['DANIELLE_EMAIL'], 'Danielle Lawton');
 
         if (!empty($_POST['receiver-email'])) {
-            $mail->addCC($_POST['receiver-email'], $_GET['receiver']);
+            $mail->addCC($_POST['receiver-email'], $_POST['receiver']);
         }
 
         $mail->isHTML(true);

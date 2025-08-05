@@ -575,12 +575,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requestor = $formData['requestorName'];
     $contractNumber = ($formData['contractNumber'] === 'other') ? $formData['otherContractNumber'] : $formData['contractNumber'];
     $otherName = $formData['otherName'];
-    $supplierStreetAddress = $formData['supplierStreetAddress'];
-    $supplierCity = $formData['supplierCity'];
-    $supplierState = $formData['supplierState'];
-    $supplierZip = $formData['supplierZip'];
+    $supplierStreetAddress = $formData['supplierStreetAddress'] ?? '';
+    $supplierCity = $formData['supplierCity'] ?? '';
+    $supplierState = $formData['supplierState'] ?? '';
+    $supplierZip = $formData['supplierZip'] ?? '';
     $supplierCitySTZIP = $supplierCity . ", " . $supplierState . " " . $supplierZip;
-    $vendorPhone = $formData['vendorPhone'];
+    $vendorPhone = $formData['vendorPhone'] ?? '';
 
     if (!empty($otherName)) {
         $sql = "INSERT INTO dbo.Vendors (VendorName, Telephone, AddressLine1, CitySTZIP) VALUES (?, ?, ?, ?)";
