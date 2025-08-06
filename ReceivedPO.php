@@ -161,6 +161,7 @@ if ($selectedPO) {
                                 <th>Amount</th>
                                 <th>Received</th>
                                 <th>Amount Received</th>
+                                <th>Don't Add to Inventory</th>
                             </tr>
                             <?php foreach ($items as $item) : ?>
                             <tr>
@@ -169,7 +170,8 @@ if ($selectedPO) {
                                 <td>
                                     <input type="checkbox" name="received_items[]" value="<?php echo htmlspecialchars($item['ItemID']) ?>">
                                 </td>
-                                <td><input type="number" class="form-control" name="amountRecieved" value="<?php echo htmlspecialchars($item['Quantity'] ?? '') ?>"></td>
+                                <td><input type="number" class="form-control" name="amountReceived[<?php echo htmlspecialchars($item['ItemID']) ?>]" value="<?php echo htmlspecialchars($item['Quantity'] ?? '') ?>"></td>
+                                <td><input type="checkbox" name="bar_from_inventory[]" value="<?php echo htmlspecialchars($item['ItemID']) ?>"></td>
                             </tr>
                             <?php endforeach; ?>
                         </table>

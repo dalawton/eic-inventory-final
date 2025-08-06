@@ -51,6 +51,7 @@ if ($conn === false) {
 $poNum = $_POST['PO'] ?? null;
 $receivedItems = $_POST['received_items'] ?? [];
 $amountReceived = $_POST['amountReceived'] ?? [];
+$addToInventory = $_POST['bar_from_inventory'] ?? [];
 
 $sql = "SELECT * FROM dbo.POItems WHERE PONum = ?";
 $stmt = sqlsrv_query($conn, $sql, [$poNum]);
@@ -64,6 +65,7 @@ while ($item = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     $qty = $item['Quantity'];
     $received = isset($receivedItems) && in_array($itemID, $receivedItems);
     $amtInput = isset($amountReceived[$itemID]) ? intval($amountReceived[$itemID]) : 0;
+    $addToInv = isset($addToInventory) && in_array($itemID, $receivedItems);
 
     if ($received) {
         $amtToAdd = $qty;
@@ -72,7 +74,8 @@ while ($item = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
         $amtToAdd = $amtInput;
         $remaining = $qty - $amtInput;
     } else {
-        continue;
+        $amtToAdd = 0;
+        $remaining = $qty;
     }
 
     $invCheck = sqlsrv_query($conn, "SELECT Amount FROM dbo.Inventory WHERE PN = ?", [$pn]);
