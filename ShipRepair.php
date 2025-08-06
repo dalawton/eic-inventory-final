@@ -53,6 +53,20 @@ $stmt = sqlsrv_query($conn, $sql);
 if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
+$sn = $_GET['serialNumber'] ?? '';
+$batteryType = '';
+if ($sn) {
+    $batteryTypeStmt = sqlsrv_query($conn, "SELECT BatteryName FROM dbo.All_Batteries WHERE SN = ?", [$sn]);
+    if ($batteryTypeRow = sqlsrv_fetch_array($batteryTypeStmt, SQLSRV_FETCH_ASSOC)) {
+        $batteryType = $batteryTypeRow['BatteryName'];
+    }
+}
+
+$stmtParts = null;
+if ($batteryType !== '') {
+    $partsSql = "SELECT DISTINCT PN FROM dbo.PartsForBatteries WHERE BatteryName LIKE ?";
+    $stmtParts = sqlsrv_query($conn, $partsSql, [$batteryType . '%']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -73,7 +87,7 @@ if ($stmt === false) {
                 <p>Complete the form below to mark your repair as completed and shipped</p>
             </div>
             <div class="form-content">
-                <div class="form-group">
+                <form class="form-group" method="get" action="">
                     <label class="section-title" for="serialNumber">Select Repair:</label>
                     <select name="serialNumber" class="form-control" id="serialNumber">
                         <option value="">--Select--</option>
@@ -83,7 +97,7 @@ if ($stmt === false) {
                         </option>
                         <?php endwhile; ?>
                     </select>
-                </div>
+                </form>
                 
                 <div class="vendor-info" id="repairInfo" style="display:none;">
                     <strong>Repair Details:</strong>
@@ -114,7 +128,14 @@ if ($stmt === false) {
                                         </tr>
                                         <tr class="add-product-form" id="add-part-row">
                                             <td>
-                                                <input type="text" class="form-control" id="newPartNumber">
+                                                <select name="newPartNumber" class="form-control" id="newPartNumber">
+                                                    <option value="">Select a Part Number</option>
+                                                    <?php while ($row1 = sqlsrv_fetch_array($stmtParts, SQLSRV_FETCH_ASSOC)) : ?>
+                                                        <option value="<?php echo htmlspecialchars($row1['PN']) ?>">
+                                                            <?php echo htmlspecialchars($row1['PN']) ?>
+                                                        </option>
+                                                    <?php endwhile; ?>
+                                                </select>
                                             </td>
                                             <td>
                                                 <input type="number" class="form-control" id="newAmountUsed" min="0">
