@@ -62,6 +62,40 @@ if ($stmt === false) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styleIssueReport.css">
     <title>Track Issues</title>
+    <style>
+        .product-table th {
+                background: #f8f9fa;
+                font-weight: 600;
+                color: #2c3e50;
+                white-space: nowrap;
+                min-width: 20px;
+                max-width: 150px;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+            .product-table td {
+                white-space: normal;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .product-table tr:hover td {
+                background: #f8f9ff;
+            }
+
+            .product-table td span.status-label {
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.95em;
+            }
+
+            .product-table td span.status-requested { background: #f32121ff; }
+            .product-table td span.status-fixed { background: #5faf04ff; }
+            .product-table td span.status-in_progress { background: #3a0cb8ff; }
+            .product-table td span.status-other { background: #747474ff; }
+    </style>
 </head>
 <body>
     <div class="main-container">
@@ -81,19 +115,27 @@ if ($stmt === false) {
                         <th>Details</th>
                         <th>Status</th>
                     </tr>
-                    <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : ?>
+                    <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) : 
+                        $statusClass = "status-other";
+                        if ($row['Status'] === "Requested") {
+                            $statusClass = "status-requested";
+                        } else if ($row['Status'] === "Fixed") {
+                            $statusClass = "status-fixed";
+                        } else if ($row['Status'] === "In progress") {
+                            $statusClass = "status-in_progress";
+                        }
+                        ?>
                         <tr>
                             <td><?php echo htmlspecialchars($row['TypeRequest']) ?></td>
-                            <td><?php echo htmlspecialchars(($row['Date'])->format('Y-m-d')) ?></td>
+                            <td><?php echo htmlspecialchars(($row['Date'])->format('m-d-Y')) ?></td>
                             <td><?php echo htmlspecialchars($row['Details']) ?></td>
-                            <td><?php echo htmlspecialchars($row['Status']) ?></td>
+                            <td><span class="status-label <?php echo $statusClass; ?>"><?php echo htmlspecialchars($row['Status']) ?></span></td>
                         </tr>
                     <?php endwhile; ?>
                 </table>
             </div>
         </div>
         <div class="navigation">
-            <br><br>
             <button onclick="location.href='FrontPage.html'" class="btn btn-secondary">Return to Front Page</button>
             <button onclick="location.href='ReportIssue.html'" class="btn btn-secondary">Report an Issue</button>
         </div>

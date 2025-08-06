@@ -48,7 +48,7 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-$sql = "SELECT SerialNumber, Requester, DateReceived, Details, Status, DateShipped, ShippingLocation FROM dbo.Repairs";
+$sql = "SELECT SerialNumber, Requester, DateReceived, Details, Status, DateShipped, ShippingLocation FROM dbo.Repairs ORDER BY DateReceived DESC";
 $stmt = sqlsrv_query($conn, $sql);
 
 ?>
@@ -224,7 +224,7 @@ $stmt = sqlsrv_query($conn, $sql);
                                         $statusClass = "status-received";
                                     } elseif ($value === "SHIPPED") {
                                         $statusClass = "status-completed";
-                                    } elseif ($value === "IN-BOUND") {
+                                    } elseif ($value === "INBOUND") {
                                         $statusClass = "status-inbound";
                                     } elseif ($value === "IN-HOUSE") {
                                         $statusClass = "status-in-house";
@@ -250,7 +250,7 @@ $stmt = sqlsrv_query($conn, $sql);
                                             $statusClass = "status-received";
                                         } elseif ($value === "SHIPPED") {
                                             $statusClass = "status-completed";
-                                        } elseif ($value === "IN-BOUND") {
+                                        } elseif ($value === "INBOUND") {
                                             $statusClass = "status-inbound";
                                         } elseif ($value === "IN-HOUSE") {
                                             $statusClass = "status-in-house";

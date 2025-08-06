@@ -54,6 +54,8 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
 if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
+
+$selectedPO = '';
 ?>
 
 <html>

@@ -55,7 +55,7 @@ if (isset($_POST['action'])) {
     if ($_POST['action'] === 'getComponents') {
         $parentSN = $_POST['parentSN'];
         
-        $sqlComponents = "SELECT bc.ComponentSN, ab.BatteryName, ab.Status 
+        $sqlComponents = "SELECT bc.ComponentSN, bc.DateUsed, ab.BatteryName, ab.Status
                          FROM dbo.Battery_Components bc 
                          JOIN dbo.All_Batteries ab ON bc.ComponentSN = ab.SN 
                          WHERE bc.ParentSN = ?";
@@ -64,6 +64,9 @@ if (isset($_POST['action'])) {
         $components = [];
         $componentType = "";
         while ($row = sqlsrv_fetch_array($componentsStmt, SQLSRV_FETCH_ASSOC)) {
+            if (isset($row['DateUsed']) && is_object($row['DateUsed'])) {
+                $row['DateUsed'] = $row['DateUsed']->format('m-d-Y');
+            }
             $components[] = $row;
             $componentType = $row['BatteryName'];
         }
@@ -347,7 +350,7 @@ $stmt = sqlsrv_query($conn, $sql, $params);
                             <strong>Component SN:</strong> ${component.ComponentSN} | 
                             <strong>Battery:</strong> ${component.BatteryName} | 
                             <strong>Status:</strong> ${component.Status} |
-                            <strong>Date Used:</strong> ${component.Date}
+                            <strong>Date Used:</strong> ${component.DateUsed}
                         </div>
                         <div id="component-actions" class="component-actions">
                             <button class="btn btn-update" onclick="showUpdateForm('${component.ComponentSN}')">Update</button>
