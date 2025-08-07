@@ -258,7 +258,7 @@ if ($contractStmt === false) {
                                 <option value="">--Select Contract--</option>
                                 <?php while ($cRow = sqlsrv_fetch_array($contractStmt, SQLSRV_FETCH_ASSOC)) : ?>
                                     <option value="<?php echo htmlspecialchars($cRow['contractNumber']) ?>">
-                                        <?php echo htmlspecialchars($cRow['contractNumber']) . ' - ' . htmlspecialchars($cRow['Description']) ?>
+                                        <?php echo htmlspecialchars($cRow['contractNumber']) . ' - ' . htmlspecialchars($cRow['Description']) ?? '' ?>
                                     </option>
                                 <?php endwhile; ?>
                                 <option value="other">Other</option>

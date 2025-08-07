@@ -244,7 +244,7 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
             <h1>Purchase Order Requisition Form</h1>
             <p><strong>PO Number:</strong> ' . htmlspecialchars($formData['purchaseOrderNumber'] ?? 'N/A') . '</p>
             <p><strong>Date:</strong> ' . htmlspecialchars($formData['date'] ?? 'N/A') . '</p>
-            <p><strong>Submitted:</strong> ' . date('Y-m-d') . '</p>
+            <p><strong>Submitted:</strong> ' . date('m-d-Y') . '</p>
         </div>';
 
     if (!empty($formData['needWorkOrder']) || !empty($formData['confirming'])) {
@@ -581,7 +581,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderDate = $formData['date'];
     $requestor = $formData['requestorName'];
     $contractNumber = $formData['contractNumber'];
-    $otherName = $formData['otherName'];
+    $otherName = $formData['otherName'] ?? '';
     $supplierStreetAddress = $formData['supplierStreetAddress'] ?? '';
     $supplierCity = $formData['supplierCity'] ?? '';
     $supplierState = $formData['supplierState'] ?? '';
