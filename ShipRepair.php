@@ -48,7 +48,7 @@ if ($conn === false) {
     die("Connection failed: " . print_r(sqlsrv_errors(), true));
 }
 
-$sql = "SELECT SerialNumber FROM dbo.Repairs WHERE Status != 'SHIPPED'";
+$sql = "SELECT SerialNumber FROM dbo.Repairs WHERE Status = 'NEEDS REPAIR'";
 $stmt = sqlsrv_query($conn, $sql);
 if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
@@ -130,11 +130,6 @@ if ($batteryType !== '') {
                                             <td>
                                                 <select name="newPartNumber" class="form-control" id="newPartNumber">
                                                     <option value="">Select a Part Number</option>
-                                                    <?php while ($row1 = sqlsrv_fetch_array($stmtParts, SQLSRV_FETCH_ASSOC)) : ?>
-                                                        <option value="<?php echo htmlspecialchars($row1['PN']) ?>">
-                                                            <?php echo htmlspecialchars($row1['PN']) ?>
-                                                        </option>
-                                                    <?php endwhile; ?>
                                                 </select>
                                             </td>
                                             <td>
@@ -173,9 +168,18 @@ if ($batteryType !== '') {
                     repairDetails.html('');
                     otherFields.hide();
                     $('#hiddenSerialNumber').val('');
+                    $('#newPartNumber').html('<option value="">Select a Part Number</option>');
                 } else if (val) {
                     $('#hiddenSerialNumber').val(val);
-                    
+                    $.get('getPartsForBattery.php', { serialNumber: val }, function(parts) {
+                        var options = '<option value="">Select a Part Number</option>';
+                        if (Array.isArray(parts)) {
+                            parts.forEach(function(pn) {
+                                options += `<option value="${pn}">${pn}</option>`;
+                            });
+                        }
+                        $('#newPartNumber').html(options);
+                    });
                     $.get('getRepairInfo.php', { serialNumber: val }, function(data) {
                         var info = '';
                         try {
@@ -199,6 +203,7 @@ if ($batteryType !== '') {
                     repairInfo.hide();
                     otherFields.hide();
                     $('#hiddenSerialNumber').val('');
+                    $('#newPartNumber').html('<option value="">Select a Part Number</option>');
                 }
             });
 

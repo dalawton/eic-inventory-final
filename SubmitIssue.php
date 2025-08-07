@@ -55,13 +55,6 @@ if ($conn === false) {
 $mail = new PHPMailer(true);
 
 try {
-    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
-        $file_name = $_FILES['attachment']['name'];
-        $file_tmp = $_FILES['attachment']['tmp_name'];
-    } else {
-        $file_name = null;
-        $file_tmp = null;
-    }
     $mail->isSMTP();
     $mail->Host = 'smtp.office365.com';
     $mail->SMTPAuth = true;
@@ -143,6 +136,9 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
+    $file = $_FILES['attachment'];
+    $file_name = $_FILES['attachment']['name'];
+    $file_tmp = $_FILES['attachment']['tmp_name'];
     $typeRequest = $formData['typeRequest'];
     $date = $formData['date'];
     $requestorName = $formData['name'] ?? '';
