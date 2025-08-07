@@ -164,11 +164,11 @@ if ($stmt === false) {
                             }
                             echo "</div>";
                             echo "</tr>";
-
+                            
+                            $isCancelled = ($row['Status'] === "Cancelled");
+                            echo "<tr" . ($isCancelled ? " class='reverted'" : "text") . ">";
                             foreach ($row as $colName => $value) {
                                 $statusType = strtolower($row['Status']);
-                                $isCancelled = ($row['Status'] === "Cancelled");
-                                echo "<tr" . ($isCancelled ? " class='reverted'" : "text") . ">";
                                 $statusClass = "status-other";
                                 if ($statusType === "ordered") {
                                     $statusClass = "status-ordered";
@@ -181,7 +181,7 @@ if ($stmt === false) {
                                 }
 
                                 if ($value instanceof DateTime) {
-                                    echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                    echo "<td>" . htmlspecialchars($value->format('m-d-Y')) . "</td>";
                                 } elseif (strtolower($colName) === 'price') {
                                     echo "<td>$" . number_format((float)$value, 2) . "</td>";
                                 } elseif (strtolower($colName) === 'status') {
@@ -209,7 +209,7 @@ if ($stmt === false) {
                                     }
                                     
                                     if ($value instanceof DateTime) {
-                                        echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                        echo "<td>" . htmlspecialchars($value->format('m-d-Y')) . "</td>";
                                     } elseif (strtolower($colName) === 'price') {
                                         echo "<td>$" . number_format((float)$value, 2) . "</td>";
                                     } elseif (strtolower($colName) === 'status') {

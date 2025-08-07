@@ -336,6 +336,10 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
         $html .= ' - ' . htmlspecialchars($formData['otherContractNumber']);
     }
 
+    if (!empty($formData['otherContractDescription'])) {
+        $html .= ' - ' . htmlspecialchars($formData['otherContractDescription']);
+    }
+
     $html .= '
             </div>
             <div class="info-item">
@@ -487,6 +491,9 @@ function generatePlainTextVersion($formData, $products)
     if (!empty($formData['otherContractNumber'])) {
         $text .= " - " . $formData['otherContractNumber'];
     }
+    if (!empty($formData['otherContractDescription'])) {
+        $text .= " - " . $formData['otherContractDescription'];
+    }
     $text .= "\n";
     $text .= "Delivery Address: 111 Downey Street, Norwood, MA 02062\n\n";
 
@@ -573,7 +580,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vendorName = $formData['vendorName'];
     $orderDate = $formData['date'];
     $requestor = $formData['requestorName'];
-    $contractNumber = ($formData['contractNumber'] === 'other') ? $formData['otherContractNumber'] : $formData['contractNumber'];
+    $contractNumber = $formData['contractNumber'];
     $otherName = $formData['otherName'];
     $supplierStreetAddress = $formData['supplierStreetAddress'] ?? '';
     $supplierCity = $formData['supplierCity'] ?? '';
@@ -593,8 +600,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($formData['contractNumber'] === 'other' && !empty($formData['otherContractNumber'])) {
-        $sql = "INSERT INTO dbo.contractNumbers (contractNumber) VALUES (?)";
-        $params = [$formData['otherContractNumber']];
+        $sql = "INSERT INTO dbo.contractNumbers (contractNumber, Description) VALUES (?, ?)";
+        $params = [$formData['otherContractNumber'], $formData['otherContractDescription']];
         $stmt = sqlsrv_query($conn, $sql, $params);
         if ($stmt === false) {
             error_log("Contract insert failed: " . print_r(sqlsrv_errors(), true));

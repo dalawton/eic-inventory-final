@@ -79,7 +79,7 @@ if ($stmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
 }
 
-$contractSql = "SELECT contractNumber FROM contractNumbers ORDER BY contractNumber";
+$contractSql = "SELECT contractNumber, Description FROM contractNumbers ORDER BY contractNumber";
 $contractStmt = sqlsrv_query($conn, $contractSql);
 if ($contractStmt === false) {
     die("Query failed: " . print_r(sqlsrv_errors(), true));
@@ -258,7 +258,7 @@ if ($contractStmt === false) {
                                 <option value="">--Select Contract--</option>
                                 <?php while ($cRow = sqlsrv_fetch_array($contractStmt, SQLSRV_FETCH_ASSOC)) : ?>
                                     <option value="<?php echo htmlspecialchars($cRow['contractNumber']) ?>">
-                                        <?php echo htmlspecialchars($cRow['contractNumber']) ?>
+                                        <?php echo htmlspecialchars($cRow['contractNumber']) . ' - ' . htmlspecialchars($cRow['Description']) ?>
                                     </option>
                                 <?php endwhile; ?>
                                 <option value="other">Other</option>
@@ -268,6 +268,8 @@ if ($contractStmt === false) {
                         <div class="form-group">
                             <label for="otherContractNumber">Other Contract Number:</label>
                             <input type="text" id="otherContractNumber" name="otherContractNumber" class="form-control">
+                            <label for="otherContractDescription">Other Contract Description:</label>
+                            <input type="text" id="otherContractDescription" name="otherContractDescription" class="form-control">
                         </div>
                     </div>
 

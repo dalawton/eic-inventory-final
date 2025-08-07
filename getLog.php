@@ -97,6 +97,7 @@ $stmt = sqlsrv_query($conn, $sql);
         .log-table td span.table-batteries { color: #308859ff; font-weight: bold; }
         .log-table td span.table-other { color: #3d3d3dff; font-weight: bold; }
         .log-table td span.status-shipped_out { background: #4caf50; }
+        .log-table td span.status-inbound { background: #262e99ff; }
         .log-table td span.status-needs_repair { background: #f44336; }
         .log-table td span.status-in_house { background: #f8a232ff; }
         .log-table td span.status-used { background: #839172ff; }
@@ -168,7 +169,7 @@ $stmt = sqlsrv_query($conn, $sql);
                             } elseif ($tableType === "batteries") {
                                 $tableClass = "table-batteries";
                             }
-                            echo "<td style='width: 10%;'>" . htmlspecialchars($row['ActionTime']->format('Y-m-d')) . "</td>";
+                            echo "<td style='width: 10%;'>" . htmlspecialchars($row['ActionTime']->format('m-d-Y')) . "</td>";
                             echo "<td style='width: 10%;'><span class='action-label $actionClass'>" . htmlspecialchars(ucfirst($row['ActionType'])) . "</span></td>";
                             echo "<td style='width: 8%;'><span class='$tableClass'>" . htmlspecialchars($row['TableAffected'] ?? '') . "</span></td>";
                             echo "<td style='width: 14%;'>" . htmlspecialchars($row['ProductNumber'] ?? '') . "</td>";

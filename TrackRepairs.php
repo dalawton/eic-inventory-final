@@ -233,7 +233,7 @@ $stmt = sqlsrv_query($conn, $sql);
                                     }
                                     
                                     if ($value instanceof DateTime) {
-                                        echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                        echo "<td>" . htmlspecialchars($value->format('m-d-Y')) . "</td>";
                                     } elseif ($statusClass != "status-other") {
                                         echo "<td><span class='status-label $statusClass'>" . htmlspecialchars((string)$value) . "</span></td>";
                                     } else {
@@ -259,7 +259,7 @@ $stmt = sqlsrv_query($conn, $sql);
                                         }
                                         
                                         if ($value instanceof DateTime) {
-                                            echo "<td>" . htmlspecialchars($value->format('Y-m-d')) . "</td>";
+                                            echo "<td>" . htmlspecialchars($value->format('m-d-Y')) . "</td>";
                                         } elseif ($statusClass != "status-other") {
                                             echo "<td><span class='status-label $statusClass'>" . htmlspecialchars((string)$value) . "</span></td>";
                                         } else {
