@@ -73,8 +73,6 @@ foreach ($partNumbers as $i => $pn) {
 
     if ($stmtIns === false) {
         die(print_r(sqlsrv_errors(), true));
-    } else {
-        echo "Record added successfully.<br>";
     }
 }
     sqlsrv_free_stmt($stmt);
@@ -88,6 +86,9 @@ foreach ($partNumbers as $i => $pn) {
     </head>
     <body>
         <div class="main-container">
+            <div class="form-content">
+                <h1>Battery successfully added</h1>
+            </div>
             <div class="navigation">
                     <button onclick="location.href='checkoutCompletedBuilds.php'" 
                         class="btn btn-secondary">

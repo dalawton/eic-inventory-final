@@ -99,10 +99,13 @@ try {
     $body .= "</div>";
     $body .= "</body></html>";
 
-    $mail->Body = $body;
-    if ($file_tmp && $file_name) {
-        $mail->addAttachment($file_tmp, $file_name);
+    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+        $uploadTmpPath = $_FILES['attachment']['tmp_name'];
+        $uploadName = $_FILES['attachment']['name'];
+        $mail->addAttachment($uploadTmpPath, $uploadName);
     }
+
+    $mail->Body = $body;
 
     $altBody = "New Issue Submission\n\n";
     $altBody .= "Type: " . ($_POST['typeRequest'] ?? 'Not specified') . "\n";
@@ -136,9 +139,6 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
-    $file = $_FILES['attachment'];
-    $file_name = $_FILES['attachment']['name'];
-    $file_tmp = $_FILES['attachment']['tmp_name'];
     $typeRequest = $formData['typeRequest'];
     $date = $formData['date'];
     $requestorName = $formData['name'] ?? '';
