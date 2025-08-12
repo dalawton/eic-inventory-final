@@ -43,7 +43,7 @@ $connectionOptions = [
 ];
 
 $conn = sqlsrv_connect($serverName, $connectionOptions);
-
+$selectedSN = '';
 $sql = "SELECT SN FROM dbo.All_Batteries WHERE Status = 'IN-HOUSE' AND BatteryName IN (SELECT BatteryName FROM dbo.Battery WHERE Complete = 'YES')";
 $stmt = sqlsrv_query($conn, $sql);
 $snOptions = [];

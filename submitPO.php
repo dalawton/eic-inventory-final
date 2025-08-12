@@ -120,9 +120,6 @@ function sendPurchaseOrderEmail($formData, $products, $vendorDetails)
  */
 function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [])
 {
-    error_log("Form data: " . print_r($formData, true));
-    error_log("Vendor details: " . print_r($vendorDetails, true));
-    
     $isNewVendor = ($formData['vendorName'] === 'not_listed');
     
     if ($isNewVendor) {
@@ -543,9 +540,6 @@ function generatePlainTextVersion($formData, $products)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
     $products = json_decode($formData['productsJSON'], true);
-
-    error_log("Received products JSON: " . $formData['productsJSON']);
-    error_log("Form data received: " . print_r($formData, true));
     
     $final_total = 0.00;
     $processedProducts = [];
@@ -611,12 +605,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $vendorDetails = null;
     if ($vendorName && $vendorName !== 'not_listed') {
-        error_log("Looking up vendor details for vendorName: " . $vendorName);
         $sql1 = "SELECT VendorName, Telephone, AddressLine1, CitySTZIP, ContactName, ContactEmail FROM dbo.Vendors WHERE VendorName = ?";
         $stmt1 = sqlsrv_query($conn, $sql1, [$vendorName]);
         if ($stmt1 !== false) {
             $vendorDetails = sqlsrv_fetch_array($stmt1, SQLSRV_FETCH_ASSOC);
-            error_log("Vendor details found: " . print_r($vendorDetails, true));
         } else {
             error_log("Vendor query failed: " . print_r(sqlsrv_errors(), true));
         }

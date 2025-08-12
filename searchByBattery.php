@@ -56,8 +56,6 @@ if ($batteriesStmt === false) {
 if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
     $batteryName = $_POST['batteryName'] ?? 0;
     
-    error_log("Battery Name requested: " . $batteryName);
-    
     $sql = "SELECT 
                 pfb.PN, 
                 pfb.Amount as PartsNeeded,
@@ -75,7 +73,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'getBatteryParts') {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             $parts[] = $row;
         }
-        error_log("Found " . count($parts) . " parts for battery name " . $batteryName);
     } else {
         error_log("SQL Error: " . print_r(sqlsrv_errors(), true));
         $parts = ['error' => 'Database query failed', 'details' => sqlsrv_errors()];

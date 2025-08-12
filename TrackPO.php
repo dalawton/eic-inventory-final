@@ -65,7 +65,7 @@ if (isset($_GET['searchPO']) && $_GET['searchPO'] !== '') {
     $where = "WHERE Purchaser LIKE ?";
     $params = ["%$search%"];
 }
-$sql = "SELECT * FROM POs $where ORDER BY PONum DESC";
+$sql = "SELECT TOP 100 * FROM POs $where ORDER BY PONum DESC";
 $stmt = sqlsrv_query($conn, $sql, $params);
 
 if ($stmt === false) {
