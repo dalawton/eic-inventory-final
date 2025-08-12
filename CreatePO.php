@@ -317,7 +317,7 @@ if ($contractStmt === false) {
 
                             <div class="form-group">
                                 <label for="unitPrice">Unit Price:</label>
-                                <input type="number" id="unitPrice" name="unitPrice" step="0.01" class="form-control">
+                                <input type="number" id="unitPrice" name="unitPrice" step="0.001" class="form-control">
                             </div>
                         </div>
 
@@ -444,9 +444,9 @@ if ($contractStmt === false) {
             newRow.innerHTML = `
                 <td>${productNumber}</td>
                 <td>${quantity}</td>
-                <td>$${parseFloat(unitPrice).toFixed(2)}</td>
+                <td>$${parseFloat(unitPrice).toFixed(3)}</td>
                 <td>${description}</td>
-                <td>$${(quantity * unitPrice).toFixed(2)}</td>
+                <td>$${(quantity * unitPrice).toFixed(3)}</td>
                 <td>
                     <button type="button" class="btn btn-secondary btn-edit">Edit</button>
                     <button type="button" class="btn btn-danger btn-remove">Remove</button>
@@ -574,9 +574,9 @@ if ($contractStmt === false) {
             $row.html(`
                 <td>${productNumber}</td>
                 <td>${parsedQuantity}</td>
-                <td>$${parsedUnitPrice.toFixed(2)}</td>
+                <td>$${parsedUnitPrice.toFixed(3)}</td>
                 <td>${description}</td>
-                <td>$${total.toFixed(2)}</td>
+                <td>$${total.toFixed(3)}</td>
                 <td>
                     <button type="button" class="btn btn-secondary btn-edit">Edit</button>
                     <button type="button" class="btn btn-danger btn-remove">Remove</button>
@@ -591,9 +591,9 @@ if ($contractStmt === false) {
                 $row.html(`
                     <td>${orig.productNumber}</td>
                     <td>${orig.quantity}</td>
-                    <td>$${parseFloat(orig.unitPrice).toFixed(2)}</td>
+                    <td>$${parseFloat(orig.unitPrice).toFixed(3)}</td>
                     <td>${orig.description}</td>
-                    <td>$${(parseFloat(orig.quantity) * parseFloat(orig.unitPrice)).toFixed(2)}</td>
+                    <td>$${(parseFloat(orig.quantity) * parseFloat(orig.unitPrice)).toFixed(3)}</td>
                     <td>
                         <button type="button" class="btn btn-secondary btn-edit">Edit</button>
                         <button type="button" class="btn btn-danger btn-remove">Remove</button>

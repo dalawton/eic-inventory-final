@@ -37,33 +37,67 @@
                     <div class="collapsible-content" style="display:none;">
                         <p><strong><u>Steps to Delete Purchase Order:</u></strong><br>
                             <br><b>First - Delete Parts from PO Items Database</b><br>
-                            1. Open a new .sql file on a computer with connection to the SQL Server <br>
-                            2. Add the following text: <br>
+                            1.  Open a new .sql file on a computer with connection to the SQL Server <br>
+                            2.  Add the following text: <br>
                             <strong>DELETE FROM dbo.POItems WHERE PONum= '<i>PO Number</i>';</strong><br>
-                            3. Replace '<i>PO Number</i>' with the Purchase Order Number Submitted, making sure to wrap the number in single quotes <br>
-                            4. Run the file and confirm deletion of parts associated with the PO number. <br>
+                            3.  Replace '<i>PO Number</i>' with the Purchase Order Number Submitted, making sure to wrap the number in single quotes <br>
+                            4.  Run the file and confirm deletion of parts associated with the PO number. <br>
                             <br><b>Next - Delete PO from Purchase Order Database</b><br>
-                            5. Update the .sql file on the same computer to say:<br>
+                            5.  Update the .sql file on the same computer to say:<br>
                             <strong>DELETE FROM dbo.POs WHERE PONum= '<i>PO Number</i>';</strong><br>
-                            6. Replace '<i>PO Number</i>' with the Purchase Order Number Submitted, making sure to wrap the number in single quotes <br>
-                            7. Run the file and confirm deletion of Purchase Order.<br>
+                            6.  Replace '<i>PO Number</i>' with the Purchase Order Number Submitted, making sure to wrap the number in single quotes <br>
+                            7.  Run the file and confirm deletion of Purchase Order.<br>
                         </p>
                     </div>
                     
                     <h2 class="title-section collapsible"><strong>Add, Change or Delete Email Recipient</strong></h2>
                     <div class="collapsible-content" style="display:none;">
                         <p><strong><u>Steps to Change Email Recipient</u></strong><br>
-                            <br>1. Locate the file called "submitPO.php"<br>
-                            2. Inside the 'sendPurchaseOrderEmail' function, find the recipient section<br>
-                            3. To add a CC recipient add "$mail->addCC('<i>EMAIL</i>', '<i>NAME</i>');"<br>
-                            4. Replace EMAIL and NAME with the intended addresses and make sure to wrap both values in single quotes<br>
-                            5. Save the file and ensure proper functionality.
+                            <br>1.  Locate the file called "submitPO.php"<br>
+                            2.  Inside the 'sendPurchaseOrderEmail' function, find the recipient section<br>
+                            3.  To add a CC recipient add "$mail->addCC('<i>EMAIL</i>', '<i>NAME</i>');"<br>
+                            4.  Replace EMAIL and NAME with the intended addresses and make sure to wrap both values in single quotes<br>
+                            5.  Save the file and ensure proper functionality.
                         </p>
                     </div>
 
-                    <h2 class="title-section collapsible"><strong>Add, Change or Delete Questions from Purchase Order Form</strong></h2>
+                    <h2 class="title-section collapsible"><strong><u>Add</u> a Section/Questions to Purchase Order Form</strong></h2>
                     <div class="collapsible-content" style="display:none;">
-                        <p><!-- UPDATE WITH INSTRUCTIONS --></p>
+                        <p><strong><u>Steps to Add a Section/Questions to PO Form:</u></strong><br>
+                            <br>1.  Locate the file called "CreatePO.php"
+                            <br>2.  Find the location where you want to add your section/question
+                            <br>3.  Use HTML to add the section/questions
+                            <br>4.  Make sure the section/questions is inside a form '< form >< /form >' tag
+                            <br>5.  Save the file and locate "submitPO.php"
+                            <br>6.  Add section to both the 'generatePlainTextVersion' and 'sendPurchaseOrderEmail' functions to display the information from the new section/question
+                            <br>7.  Save the file and ensure proper functionality.
+                        </p>
+                    </div>
+
+                    <h2 class="title-section collapsible"><strong><u>Change</u> a Section/Questions in Purchase Order Form</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p><strong><u>Steps to Change a Section/Questions in PO Form:</u></strong><br>
+                            <br>1.  Locate the file called "CreatePO.php"
+                            <br>2.  Find the location of the section/questions you want to change
+                            <br>3.  Use HTML to update the section/questions
+                            <br>4.  Make sure the section/questions is inside a form '< form >< /form >' tag
+                            <br>5.  Save the file and locate "submitPO.php"
+                            <br>6.  Update section in both the 'generatePlainTextVersion' and 'sendPurchaseOrderEmail' functions to display the information using the correct input type from the updated section/question
+                            <br>7.  Save the file and ensure proper functionality.
+                        </p>
+                    </div>
+
+                    <h2 class="title-section collapsible"><strong><u>Remove</u> a Section/Questions from Purchase Order Form</strong></h2>
+                    <div class="collapsible-content" style="display:none;">
+                        <p><strong><u>Steps to Remove a Section/Questions from PO Form:</u></strong><br>
+                            <br>1.  Locate the file called "CreatePO.php"
+                            <br>2.  Find the location of the section/question you wish to remove
+                            <br>3.  Delete the section/question
+                            <br>4.  Delete all references to that section/question
+                            <br>5.  Save the file and locate "submitPO.php"
+                            <br>6.  Remove section from both the 'generatePlainTextVersion' and 'sendPurchaseOrderEmail' functions about the section/question
+                            <br>7.  Save the file and ensure proper deletion.
+                        </p>
                     </div>
 
                 </div>
@@ -73,12 +107,12 @@
 
                     <h2 class="title-section collapsible"><strong>Delete Repair</strong></h2>
                     <div class="collapsible-content" style="display:none;">
-                        <p><strong><u>Steps to Delete a Repair:</u></strong><br>
-                            1. Open a new .sql file on a computer with connection to the SQL Server <br>
-                            2. Add the following text: <br>
+                        <p><strong><u>Steps to Delete a Repair:</u></strong><br><br>
+                            1.  Open a new .sql file on a computer with connection to the SQL Server <br>
+                            2.  Add the following text: <br>
                             <strong>DELETE FROM dbo.Repairs WHERE SerialNumber='<i>Serial Number</i>';</strong><br>
-                            3. Replace '<i>Serial Number</i>' with the Repair Serial Number, making sure to wrap the number in single quotes.<br>
-                            4. Run the file and ensure proper deletion from Repair Database.
+                            3.  Replace '<i>Serial Number</i>' with the Repair Serial Number, making sure to wrap the number in single quotes.<br>
+                            4.  Run the file and ensure proper deletion from Repair Database.
                         </p>
                     </div>
 

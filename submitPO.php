@@ -386,15 +386,15 @@ function generatePurchaseOrderEmailBody($formData, $products, $vendorDetails = [
                     <td>' . htmlspecialchars($product['productNumber'] ?? '') . '</td>
                     <td>' . htmlspecialchars($product['description'] ?? '') . '</td>
                     <td style="text-align: center;">' . $quantity . '</td>
-                    <td class="price-cell">$' . number_format($unitPrice, 2) . '</td>
-                    <td class="price-cell">$' . number_format($total, 2) . '</td>
+                    <td class="price-cell">$' . number_format($unitPrice, 3) . '</td>
+                    <td class="price-cell">$' . number_format($total, 3) . '</td>
                 </tr>';
         }
 
         $html .= '
                     <tr class="total-row">
                         <td colspan="4" style="text-align: right;"><strong>Grand Total:</strong></td>
-                        <td class="price-cell"><strong>$' . number_format($grandTotal, 2) . '</strong></td>
+                        <td class="price-cell"><strong>$' . number_format($grandTotal, 3) . '</strong></td>
                     </tr>
                 </tbody>
             </table>
@@ -520,13 +520,13 @@ function generatePlainTextVersion($formData, $products)
                 substr($product['productNumber'] ?? '', 0, 15),
                 substr($product['description'] ?? '', 0, 30),
                 $quantity,
-                number_format($unitPrice, 2),
-                number_format($total, 2)
+                number_format($unitPrice, 3),
+                number_format($total, 3)
             );
         }
 
         $text .= str_repeat("-", 80) . "\n";
-        $text .= sprintf("%56s $%-11s\n", "GRAND TOTAL:", number_format($grandTotal, 2));
+        $text .= sprintf("%56s $%-11s\n", "GRAND TOTAL:", number_format($grandTotal, 3));
     }
 
     $text .= "\n\n";
@@ -564,7 +564,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        $lineTotal = round($quantity * $unitPrice, 2);
+        $lineTotal = round($quantity * $unitPrice, 3);
         $final_total += $lineTotal;
 
         $processedProducts[] = [
@@ -653,7 +653,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = sendPurchaseOrderEmail($formData, $processedProducts, $vendorDetails);
 
     if ($result['success']) {
-        echo "Purchase order submitted successfully! Total: $" . number_format($final_total, 2) . ". Email sent.";
+        echo "Purchase order submitted successfully! Total: $" . number_format($final_total, 3) . ". Email sent.";
     } else {
         echo "Purchase order submitted but email failed: " . $result['message'];
     }
